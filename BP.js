@@ -1,0 +1,599 @@
+import { CompositeCost, CustomCost, ExponentialCost, FirstFreeCost, LinearCost } from "./api/Costs";
+import { Localization } from "./api/Localization";
+import { parseBigNumber, BigNumber } from "./api/BigNumber";
+import { theory } from "./api/Theory";
+import { Utils } from "./api/Utils";
+
+var id = "bin_packing";
+var name = "Bin Packing";
+var description = "not null";
+var authors = "Gen (Gen#3006) - Idea\nXLII (XLII#0042) - Balancing";
+var version = 1;
+var releaseOrder = "7";
+
+var rho1_dot = BigNumber.ZERO;
+var rho2_dot = BigNumber.ZERO;
+
+var updateBin_flag = false;
+
+var q1, q2, B_1, B_3, B_5, B_7, B_17, B_37, B_57, B_97, B_99;
+var X, Y = BigNumber.ONE;
+var B5Term, B7Term, B17Term, B37Term, B57Term, B97Term;
+
+var init = () => {
+    currency = theory.createCurrency();
+    currency2 = theory.createCurrency();
+
+    ///////////////////
+    // Regular Upgrades
+
+    // q1
+    {
+        let getDesc = (level) => "q_1=" + getQ1(level).toString(0);
+        let getInfo = (level) => "q_1=" + getQ1(level).toString(0);
+        q1 = theory.createUpgrade(0, currency, new FirstFreeCost(new ExponentialCost(20, 1.4)));
+        q1.getDescription = (amount) => Utils.getMath(getDesc(q1.level));
+        q1.getInfo = (amount) => Utils.getMathTo(getInfo(q1.level), getInfo(q1.level + amount));
+    }
+
+    // q2
+    {
+        let getDesc = (level) => "q_2=" + getQ2(level).toString(0);
+        let getInfo = (level) => "q_2=" + getQ2(level).toString(0);
+        q2 = theory.createUpgrade(1, currency, new ExponentialCost(20, 5));
+        q2.getDescription = (amount) => Utils.getMath(getDesc(q2.level));
+        q2.getInfo = (amount) => Utils.getMathTo(getInfo(q2.level), getInfo(q2.level + amount));
+    }
+    
+    // B1
+    {
+        let getDesc = (level) => "B_1=" + level;
+        let getInfo = (level) => "B_1=" + level;
+        B_1 = theory.createUpgrade(2, currency, new ExponentialCost(100, Math.log2(1e5)));
+        B_1.getDescription = (amount) => Utils.getMath(getDesc(B_1.level));
+        B_1.getInfo = (amount) => Utils.getMathTo(getInfo(B_1.level), getInfo(B_1.level + amount));
+        B_1.bought = (_) => updateBin_flag = true;
+        B_1.level = 1;
+    }
+    
+    // B3
+    {
+        let getDesc = (level) => "B_3=" + level;
+        let getInfo = (level) => "B_3=" + level;
+        B_3 = theory.createUpgrade(3, currency2, new ExponentialCost(50, Math.log2(100)));
+        B_3.getDescription = (amount) => Utils.getMath(getDesc(B_3.level));
+        B_3.getInfo = (amount) => Utils.getMathTo(getInfo(B_3.level), getInfo(B_3.level + amount));
+        B_3.bought = (_) => updateBin_flag = true;
+    }
+
+    // B5
+    {
+        let getDesc = (level) => "B_5=" + level;
+        let getInfo = (level) => "B_5=" + level;
+        B_5 = theory.createUpgrade(4, currency, new ExponentialCost(20, Math.log2(100)));
+        B_5.getDescription = (amount) => Utils.getMath(getDesc(B_5.level));
+        B_5.getInfo = (amount) => Utils.getMathTo(getInfo(B_5.level), getInfo(B_5.level + amount));
+        B_5.bought = (_) => updateBin_flag = true;
+    }
+
+    // B7
+    {
+        let getDesc = (level) => "B_7=" + level;
+        let getInfo = (level) => "B_7=" + level;
+        B_7 = theory.createUpgrade(5, currency2, new ExponentialCost(5, Math.log2(100)));
+        B_7.getDescription = (amount) => Utils.getMath(getDesc(B_7.level));
+        B_7.getInfo = (amount) => Utils.getMathTo(getInfo(B_7.level), getInfo(B_7.level + amount));
+        B_7.bought = (_) => updateBin_flag = true;
+    }
+
+    // B17
+    {
+        let getDesc = (level) => "B_{17}=" + level;
+        let getInfo = (level) => "B_{17}=" + level;
+        B_17 = theory.createUpgrade(6, currency, new ExponentialCost(25, Math.log2(20)));
+        B_17.getDescription = (amount) => Utils.getMath(getDesc(B_17.level));
+        B_17.getInfo = (amount) => Utils.getMathTo(getInfo(B_17.level), getInfo(B_17.level + amount));
+        B_17.bought = (_) => updateBin_flag = true;
+    }
+
+    //B37
+    {
+        let getDesc = (level) => "B_{37}=" + level;
+        let getInfo = (level) => "B_{37}=" + level;
+        B_37 = theory.createUpgrade(7, currency2, new ExponentialCost(50, Math.log2(40)));
+        B_37.getDescription = (amount) => Utils.getMath(getDesc(B_37.level));
+        B_37.getInfo = (amount) => Utils.getMathTo(getInfo(B_37.level), getInfo(B_37.level + amount));
+        B_37.bought = (_) => updateBin_flag = true;
+    }
+
+    //B57
+    {
+        let getDesc = (level) => "B_{57}=" + level;
+        let getInfo = (level) => "B_{57}=" + level;
+        B_57 = theory.createUpgrade(8, currency, new ExponentialCost(1e5, Math.log2(80)));
+        B_57.getDescription = (amount) => Utils.getMath(getDesc(B_57.level));
+        B_57.getInfo = (amount) => Utils.getMathTo(getInfo(B_57.level), getInfo(B_57.level + amount));
+        B_57.bought = (_) => updateBin_flag = true;
+    }
+
+    //B97
+    {
+        let getDesc = (level) => "B_{97}=" + level;
+        let getInfo = (level) => "B_{97}=" + level;
+        B_97 = theory.createUpgrade(9, currency2, new ExponentialCost(1e10, Math.log2(1e5)));
+        B_97.getDescription = (amount) => Utils.getMath(getDesc(B_97.level));
+        B_97.getInfo = (amount) => Utils.getMathTo(getInfo(B_97.level), getInfo(B_97.level + amount));
+        B_97.bought = (_) => updateBin_flag = true;
+    }
+
+    //B99
+    {
+        let getDesc = (level) => "B_{99}=" + level;
+        let getInfo = (level) => "B_{99}=" + level;
+        B_99 = theory.createUpgrade(10, currency2, new ExponentialCost(1, Math.log2(2)));
+        B_99.getDescription = (amount) => Utils.getMath(getDesc(B_99.level));
+        B_99.getInfo = (amount) => Utils.getMathTo(getInfo(B_99.level), getInfo(B_99.level + amount));
+        B_99.bought = (_) => updateBin_flag = true;
+        B_99.maxLevel = 100;
+    }
+
+    /////////////////////
+    // Permanent Upgrades
+    theory.createPublicationUpgrade(0, currency, 1e8);
+    theory.createBuyAllUpgrade(1, currency, 1e20);
+    theory.createAutoBuyerUpgrade(2, currency, 1e25);
+
+    /////////////////////
+    // Checkpoint Upgrades
+    theory.setMilestoneCost(new LinearCost(1,5));
+
+    {
+        q1Exp = theory.createMilestoneUpgrade(0, 4);
+        q1Exp.description = Localization.getUpgradeIncCustomExpDesc("q_1", "0.15");
+        q1Exp.info = Localization.getUpgradeIncCustomExpInfo("q_1", "0.15");
+        q1Exp.boughtOrRefunded = (_) => theory.invalidatePrimaryEquation();
+    }
+
+    {
+        B5Term = theory.createMilestoneUpgrade(1, 1);
+        B5Term.description = Localization.getUpgradeAddTermDesc("B_5");
+        B5Term.info = Localization.getUpgradeAddTermInfo("B_5");
+        B5Term.boughtOrRefunded = (_) => {updateAvailability(); };
+        B5Term.canBeRefunded = (_) => B17Term.level == 0 && B37Term.level == 0;
+    }
+
+    {
+        B7Term = theory.createMilestoneUpgrade(2, 1);
+        B7Term.description = Localization.getUpgradeAddTermDesc("B_7");
+        B7Term.info = Localization.getUpgradeAddTermInfo("B_7");
+        B7Term.boughtOrRefunded = (_) => {updateAvailability(); };
+        B7Term.canBeRefunded = (_) => B17Term.level == 0 && B37Term.level == 0;
+    }
+
+    {
+        B17Term = theory.createMilestoneUpgrade(3, 1);
+        B17Term.description = Localization.getUpgradeAddTermDesc("B_{17}");
+        B17Term.info = Localization.getUpgradeAddTermInfo("B_{17}");
+        B17Term.boughtOrRefunded = (_) => {updateAvailability(); };
+        B17Term.isAvailable = false;
+        B17Term.canBeRefunded = (_) => B57Term.level == 0 && B97Term.level == 0;
+    }
+
+    {
+        B37Term = theory.createMilestoneUpgrade(4, 1);
+        B37Term.description = Localization.getUpgradeAddTermDesc("B_{37}");
+        B37Term.info = Localization.getUpgradeAddTermInfo("B_{37}");
+        B37Term.boughtOrRefunded = (_) => {updateAvailability(); };
+        B37Term.isAvailable = false;
+        B37Term.canBeRefunded = (_) => B57Term.level == 0 && B97Term.level == 0;
+    }
+
+    {
+        B57Term = theory.createMilestoneUpgrade(5, 1);
+        B57Term.description = Localization.getUpgradeAddTermDesc("B_{57}");
+        B57Term.info = Localization.getUpgradeAddTermInfo("B_{57}");
+        B57Term.boughtOrRefunded = (_) => {updateAvailability(); };
+        B57Term.isAvailable = false;
+    }
+    
+    {
+        B97Term = theory.createMilestoneUpgrade(6, 1);
+        B97Term.description = Localization.getUpgradeAddTermDesc("B_{97}");
+        B97Term.info = Localization.getUpgradeAddTermInfo("B_{97}");
+        B97Term.boughtOrRefunded = (_) => {updateAvailability(); };
+        B97Term.isAvailable = false;
+    }
+
+    updateAvailability();
+}
+
+var updateAvailability = () => {
+    B17Term.isAvailable = B5Term.level == 1 && B7Term.level == 1; 
+    B37Term.isAvailable = B5Term.level == 1 && B7Term.level == 1; 
+    B57Term.isAvailable = B17Term.level == 1 && B37Term.level == 1; 
+    B97Term.isAvailable = B17Term.level == 1 && B37Term.level == 1
+
+    B_5.isAvailable = B5Term.level == 1;
+    B_7.isAvailable = B7Term.level == 1;
+    B_17.isAvailable = B17Term.level == 1;
+    B_37.isAvailable = B37Term.level == 1;
+    B_57.isAvailable = B57Term.level == 1;
+    B_97.isAvailable = B97Term.level == 1;
+
+    updateBin_flag = true;
+}
+
+var tick = (elapsedTime, multiplier) => {
+    let speedup = 100;
+    let dt = BigNumber.from(elapsedTime*multiplier*speedup); 
+    let bonus = theory.publicationMultiplier; 
+    let vq1 = getQ1(q1.level).pow(getQ1Exp(q1Exp.level));
+    let vq2 = getQ2(q2.level);
+    
+    if (updateBin_flag) {
+        let Bins  = [
+            B_99.level,
+            B97Term.level == 1 ? B_97.level : 0, 
+            B57Term.level == 1 ? B_57.level : 0, 
+            B37Term.level == 1 ? B_37.level : 0,
+            B17Term.level == 1 ? B_17.level : 0,
+            B7Term.level == 1 ? B_7.level : 0, 
+            B5Term.level == 1 ? B_5.level : 0, 
+            B_3.level, B_1.level]
+        let Bins2 = Bins.slice().reverse();
+
+        X = getX(Bins);
+        Y = getY(Bins2);
+
+        updateBin_flag = false;
+    }
+
+    rho1_dot = vq1 * vq2 * BigNumber.TWO.pow(X); 
+    rho2_dot = q1.level > 0 ? BigNumber.TWO.pow(Y-X) : BigNumber.ZERO; 
+
+    currency.value += bonus * rho1_dot * dt;
+    currency2.value += bonus * rho2_dot * dt;
+
+    theory.invalidateTertiaryEquation();
+}
+
+var getInternalState = () => ``;
+
+var setInternalState = (state) => {
+    let values = state.split(" ");
+    
+    updateBin_flag = true;
+}
+
+var postPublish = () => {
+    updateBin_flag = true;
+}
+
+var getPrimaryEquation = () => {
+    theory.primaryEquationHeight = 80;
+    theory.primaryEquationScale = 1.2;
+    let result = "\\begin{matrix}";
+    result += "\\dot{\\rho_1}=2^Xq_1q_2";
+    result += "\\\\\\\\";
+    result += "\\dot{\\rho_2}=2^{Y-X}";
+    result += "\\end{matrix}\\\\";
+    return result;
+}
+
+var getSecondaryEquation = () => {
+    theory.secondaryEquationHeight = 100;
+    let result = "\\text{For each Bin: }\\max(B_i+B_j+...)=100\\\\\\\\";
+    result += "\\text{X = Bins used with Full Bin Strategy}\\\\";
+    result += "\\text{Y = Bins used with Next Fit Strategy}\\\\\\\\";
+    result += "\\qquad\\qquad\\qquad\\qquad";
+    result += theory.latexSymbol + "=\\max\\rho^{0.1}"
+    return result;
+}
+
+var getTertiaryEquation = () => {
+    let result = "\\begin{matrix}";
+
+    result += "\\dot{\\rho_1} ="
+    result += rho1_dot.toString();
+
+    result += ",&\\dot{\\rho_2} ="
+    result += rho2_dot.toString();
+
+    result += ",&X ="
+    result += X.toString();
+
+    result += ",&Y ="
+    result += Y.toString();
+
+    result += "\\end{matrix}";
+
+    return result;
+}
+
+var indexToValue = [1,3,5,7,17,37,57,97,99];
+var RindexToValue = [99,97,57,37,17,7,5,3,1];
+
+//Full Bin Strategy
+//First fills up Bins with easy sequences, then brute forces full bins, then uses First Fit Decreasing on rest of items
+var getX = (XItems) => {
+    let TotalXBins = 0;
+
+    log("Start");
+    log("=====");
+    log("Total Bins: "+TotalXBins);
+    log("Items Left: "+XItems.toString());
+    log("");
+
+    //99 + 1 = 100
+    let itr = Math.min(XItems[0],XItems[8]);
+    XItems[0] -= itr;
+    XItems[8] -= itr;
+    TotalXBins += itr;
+
+    //97 + 3 = 100
+    itr = Math.min(XItems[1],XItems[7]);
+    XItems[1] -= itr;
+    XItems[7] -= itr;
+    TotalXBins += itr;
+
+    //97 + 1*3 = 100
+    itr = Math.floor(Math.min(XItems[1],XItems[8]/3));
+    XItems[1] -= itr;
+    XItems[8] -= 3*itr;
+    TotalXBins += itr;
+
+    //57 + 37 + 5 + 1 = 100 
+    itr = Math.min(XItems[2],XItems[3],XItems[6],XItems[8]);
+    XItems[2] -= itr;
+    XItems[3] -= itr;
+    XItems[6] -= itr;
+    XItems[8] -= itr;  
+    TotalXBins += itr;
+
+    //57 + 37 + 3 + 3 = 100
+    itr = Math.floor(Math.min(XItems[2],XItems[3],XItems[7]/2));
+    XItems[2] -= itr;
+    XItems[3] -= itr;
+    XItems[7] -= 2*itr;
+    TotalXBins += itr;
+
+    //57 + 17 + 17 + 5 + 3 + 1 = 100
+    itr = Math.floor(Math.min(XItems[2],XItems[4]/2,XItems[6],XItems[7],XItems[8]));
+    XItems[2] -= itr;
+    XItems[4] -= 2*itr;
+    XItems[6] -= itr;
+    XItems[7] -= itr;
+    XItems[8] -= itr;
+    TotalXBins += itr;
+
+    //57 + 17 + 17 + 3*3 = 100
+    itr = Math.floor(Math.min(XItems[2],XItems[4]/2,XItems[7]/3));
+    XItems[2] -= itr;
+    XItems[4] -= 2*itr;
+    XItems[7] -= 3*itr;
+    TotalXBins += itr;
+
+    //37 + 37 + 17 + 7 + 1 + 1 = 100
+    itr = Math.floor(Math.min(XItems[3]/2,XItems[4],XItems[5],XItems[8]/2));
+    XItems[3] -= 2*itr;
+    XItems[4] -= itr;
+    XItems[5] -= itr;
+    XItems[6] -= 2*itr;
+    TotalXBins += itr;
+
+    //37 + 17 + 17 + 17 + 7 + 5 = 100
+    itr = Math.floor(Math.min(XItems[3],XItems[4]/3,XItems[5],XItems[6]));
+    XItems[3] -= itr;
+    XItems[4] -= 3*itr;
+    XItems[5] -= itr;
+    XItems[6] -= itr;
+    TotalXBins += itr;
+
+    //37 + 17 + 17 + 4*7 + 1 = 100
+    itr = Math.floor(Math.min(XItems[3],XItems[4]/2,XItems[5]/4,XItems[8]));
+    XItems[3] -= itr;
+    XItems[4] -= 2*itr;
+    XItems[5] -= 4*itr;
+    XItems[8] -= itr;
+    TotalXBins += itr;
+
+    //37 + 7*9 = 100
+    itr = Math.floor(Math.min(XItems[3],XItems[5]/9));
+    XItems[3] -= itr;
+    XItems[5] -= 9*itr;
+    TotalXBins += itr;
+
+    //17*5 + 5*3= 100
+    itr = Math.floor(Math.min(XItems[4]/5,XItems[6]/3));
+    XItems[4] -= 5*itr;
+    XItems[6] -= 3*itr;
+    TotalXBins += itr;
+
+    //17*5 + 7 + 7 + 1 = 100
+    itr = Math.floor(Math.min(XItems[4]/5,XItems[5]/2,XItems[8]));
+    XItems[4] -= 5*itr;
+    XItems[5] -= 2*itr;
+    XItems[8] -= itr;
+    TotalXBins += itr;
+
+    //17*5 + 3*5= 100
+    itr = Math.floor(Math.min(XItems[4]/5,XItems[7]/5));
+    XItems[4] -= 5*itr;
+    XItems[7] -= 5*itr;
+    TotalXBins += itr;
+
+    //57 + 17 + 5*5 + 1 = 100
+    itr = Math.floor(Math.min(XItems[2],XItems[4],XItems[6]/5,XItems[8]));
+    XItems[2] -= itr;
+    XItems[4] -= itr;
+    XItems[6] -= 5*itr;
+    XItems[8] -= itr;
+    TotalXBins += itr;
+
+    //57 + 37 + 6*1 = 100
+    itr = Math.floor(Math.min(XItems[2],XItems[3],XItems[8]/6));
+    XItems[2] -= itr;
+    XItems[3] -= itr;
+    XItems[8] -= 6*itr;
+    TotalXBins += itr;
+
+    //5*20 = 100
+    itr = Math.floor(XItems[6]/20);
+    XItems[6] -= 20*itr;
+    TotalXBins += itr;
+
+    log("Part 1 Done");
+    log("===========");
+    log("Total Bins: "+TotalXBins);
+    log("Items Left: "+XItems.toString());
+    log("");
+
+    
+    //Brute Force
+
+    //sets the Starting Item to start packing
+    let currentShift = 2; //Skip 99 & 97 since all possible combinations are already done
+    let currentSpaceLeft;
+
+    while(true){
+        if(currentShift == 9){
+            break;
+        }
+        
+        currentSpaceLeft = 100;
+        let ItemsUsed = [0,0,0,0,0,0,0,0,0]
+        
+        //For each type of Item
+        for(let i = currentShift; i<9; i++){    
+            //take minimum of either floor div or amount of the specific Items left
+            let itr = Math.floor(Math.min(currentSpaceLeft/RindexToValue[i],XItems[i]));
+            XItems[i] -= itr;
+            ItemsUsed[i] += itr;
+            currentSpaceLeft -= RindexToValue[i]*itr;
+
+            //Check if that filled the Bin
+            if(currentSpaceLeft == 0){
+                TotalXBins++;
+                break;
+            }
+
+            //Depth 1 check to see if Bin can be filled
+            let checkSpace = RindexToValue.indexOf(currentSpaceLeft);
+            if(checkSpace != -1 && XItems[checkSpace] != 0){
+                XItems[checkSpace]--;
+                currentSpaceLeft = 0;
+                TotalXBins++;
+                break;
+            }
+        }
+        
+        //If 100 is not reached refund the Items and increase shift
+        if(currentSpaceLeft != 0){
+            for(let i=0;i<9;i++){
+                XItems[i] += ItemsUsed[i];
+            }
+            currentShift++;
+        }
+    }
+
+    log("Part 2 Done");
+    log("===========");
+    log("Total Bins: "+TotalXBins);
+    log("Items Left: "+XItems.toString());
+    log("");
+
+    //Use First Fit decreasing on the Items that are left
+    TotalXBins = TotalXBins + FFD(XItems);
+
+    log("Part 3 Done");
+    log("===========");
+    log("Total Bins: "+TotalXBins);
+    log("Items Left: "+XItems.toString());
+
+    return TotalXBins;
+}
+
+//First Fit Decreasing Algorithm
+var FFD = (FFDItems) => {
+    let numItems = FFDItems.reduce((partialSum, a) => partialSum + a, 0);
+
+    //if there are no Items then no Bins needed
+    if(numItems == 0){
+        return 0;
+    }
+
+    //Setup
+    let TotalFFDBins = 1;
+    let spaceLeftInBins = [100];
+    let currentItemIndex = 0;
+    let fitBin;
+
+    //For every bin
+    for(let i = 0; i < numItems; i++){
+        //while no Bins at current index change index
+        while(FFDItems[currentItemIndex] == 0){
+            currentItemIndex++;
+        }
+
+        //Flag if an Item was added or not to a Bin
+        fitBin = false;
+
+        //Go through each queue
+        for(let j = 0; j < TotalFFDBins; j++){
+            //If there is space to add an item to a bin, add it, set flag and break
+            if(spaceLeftInBins[j] >= RindexToValue[currentItemIndex]){
+                spaceLeftInBins[j] -= RindexToValue[currentItemIndex];
+                FFDItems[currentItemIndex]--;
+                fitBin = true;
+                break;
+            }
+        }
+        //If there was no space in any of the Bins, create a new bin and add the item there
+        if(!fitBin){
+            spaceLeftInBins[TotalFFDBins] = 100 - RindexToValue[currentItemIndex];
+            FFDItems[currentItemIndex]--;
+            TotalFFDBins++;
+        }
+    }
+
+    return TotalFFDBins;
+}
+
+//Uses Next Fit with Items sorted in Ascending Order
+var getY = (YItems) => {
+    //Setup
+    let numItems = YItems.reduce((partialSum, a) => partialSum + a, 0) 
+    let TotalYBins = 1;
+    let spaceLeftInBin = 100;
+    let currentItemIndex = 0;
+
+    // Place Items one by one
+    for (let i = 0; i < numItems; i++) {
+        while(YItems[currentItemIndex] == 0){
+            currentItemIndex++;
+        }
+        // If this Item can't fit in current Bin, create a new Bin
+        if (indexToValue[currentItemIndex] > spaceLeftInBin) {
+            TotalYBins++;
+            spaceLeftInBin = 100 - indexToValue[currentItemIndex];
+        }else{
+            spaceLeftInBin -= indexToValue[currentItemIndex];
+        }
+        YItems[currentItemIndex]--;
+    }
+    return TotalYBins;
+}
+
+
+var getPublicationMultiplier = (tau) => tau.isZero ? BigNumber.ONE : tau;
+var getPublicationMultiplierFormula = (symbol) => "{" + symbol + "}";
+var getTau = () => currency.value.pow(BigNumber.from(0.1));
+var getCurrencyFromTau = (tau) => [tau.max(BigNumber.ONE).pow(10), currency.symbol];
+var get2DGraphValue = () => currency.value.sign * (BigNumber.ONE + currency.value.abs()).log10().toNumber();
+
+var getQ1 = (level) => Utils.getStepwisePowerSum(level, 4, 10, 0);
+var getQ2 = (level) => BigNumber.TWO.pow(level);
+
+var getQ1Exp = (level) => (1 + 0.15 * level);
+
+init();
