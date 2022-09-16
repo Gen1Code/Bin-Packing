@@ -663,9 +663,10 @@ var getY = (YItems) => {
     let TotalYBins = 1;
     let spaceLeftInBin = 100;
     let currentItemIndex = 0;
+    let itr;
 
     // Place Items one by one
-    for (let i = 0; i < numItems; i++) {
+    while(numItems != 0){
         //while no Items at current index change index
         while(YItems[currentItemIndex] == 0){
             currentItemIndex++;
@@ -674,12 +675,22 @@ var getY = (YItems) => {
         if (indexToValue[currentItemIndex] > spaceLeftInBin) {
             TotalYBins++;
             spaceLeftInBin = 100 - indexToValue[currentItemIndex];
+            YItems[currentItemIndex]--;
+            numItems--;
         }else{
-            //itr here for more performance? 
-            //works for FFD since large Items are gone due to sequences and Brute force going in a descending manner but here maybe not?
-            spaceLeftInBin -= indexToValue[currentItemIndex];
+            //itr here for more performance
+            //Half implement it for when Items <= 17
+            if(currentItemIndex > 4){
+                spaceLeftInBin -= indexToValue[currentItemIndex];
+                YItems[currentItemIndex]--;
+                numItems--;
+            }else{
+                itr = Math.floor(Math.min(spaceLeftInBin/indexToValue[currentItemIndex],YItems[currentItemIndex]));
+                spaceLeftInBin -= itr*indexToValue[currentItemIndex];
+                YItems[currentItemIndex] -= itr;
+                numItems -= itr;
+            }
         }
-        YItems[currentItemIndex]--;
     }
     return TotalYBins;
 }
