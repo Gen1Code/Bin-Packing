@@ -76,7 +76,7 @@ var init = () => {
     {
         let getDesc = (level) => "B_5=" + level;
         let getInfo = (level) => "B_5=" + level;
-        B_5 = theory.createUpgrade(4, currency, new ExponentialCost(20, Math.log2(1e2)));
+        B_5 = theory.createUpgrade(4, currency, new ExponentialCost(20, Math.log2(2)));
         B_5.getDescription = (amount) => Utils.getMath(getDesc(B_5.level));
         B_5.getInfo = (amount) => Utils.getMathTo(getInfo(B_5.level), getInfo(B_5.level + amount));
         B_5.bought = (_) => updateBin_flag = true;
@@ -86,7 +86,7 @@ var init = () => {
     {
         let getDesc = (level) => "B_7=" + level;
         let getInfo = (level) => "B_7=" + level;
-        B_7 = theory.createUpgrade(5, currency2, new ExponentialCost(1, Math.log2(8)));
+        B_7 = theory.createUpgrade(5, currency2, new ExponentialCost(1, Math.log2(2)));
         B_7.getDescription = (amount) => Utils.getMath(getDesc(B_7.level));
         B_7.getInfo = (amount) => Utils.getMathTo(getInfo(B_7.level), getInfo(B_7.level + amount));
         B_7.bought = (_) => updateBin_flag = true;
@@ -96,7 +96,7 @@ var init = () => {
     {
         let getDesc = (level) => "B_{17}=" + level;
         let getInfo = (level) => "B_{17}=" + level;
-        B_17 = theory.createUpgrade(6, currency, new ExponentialCost(1e100, Math.log2(150)));
+        B_17 = theory.createUpgrade(6, currency, new ExponentialCost(1e100, Math.log2(30)));
         B_17.getDescription = (amount) => Utils.getMath(getDesc(B_17.level));
         B_17.getInfo = (amount) => Utils.getMathTo(getInfo(B_17.level), getInfo(B_17.level + amount));
         B_17.bought = (_) => updateBin_flag = true;
@@ -229,8 +229,8 @@ var init = () => {
 
     {
         ZEffect = theory.createMilestoneUpgrade(7, 1);
-        ZEffect.getDescription = (amount) => "$\\dot{\\rho_1}\\text{ gain}\\times \\left| Y-10Z \\right|, \\text{ }\\dot{\\rho_2}\\text{ gain}\\times Z$";
-        ZEffect.getInfo = (amount) => "$\\text{Multiplies }\\dot{\\rho_1} \\text{ by } \\left| Y-10Z \\right|, \\text{ Multiplies }\\dot{\\rho_2} \\text{ by } Z$";
+        ZEffect.getDescription = (amount) => "$\\dot{\\rho_1}\\text{ gain}\\times (Y-10(Z-1)), \\text{ }\\dot{\\rho_2}\\text{ gain}\\times Z$";
+        ZEffect.getInfo = (amount) => "$\\text{Multiplies }\\dot{\\rho_1} \\text{ by } (Y-10(Z-1)), \\text{ Multiplies }\\dot{\\rho_2} \\text{ by } Z$";
         ZEffect.boughtOrRefunded = (_) => {
             theory.invalidatePrimaryEquation();
             theory.invalidateSecondaryEquation();
@@ -291,7 +291,7 @@ var tick = (elapsedTime, multiplier) => {
         updateBin_flag = false;
     }
 
-    rho1_dot = vq1 * vq2 * BigNumber.TWO.pow(X) * (ZEffect.level == 1 ? (Y-BigNumber.TEN*Z).abs() : BigNumber.ONE); 
+    rho1_dot = vq1 * vq2 * BigNumber.TWO.pow(X) * (ZEffect.level == 1 ? (Y-BigNumber.TEN*(Z-BigNumber.ONE)) : BigNumber.ONE); 
     rho2_dot = q1.level > 0 ? BigNumber.FIVE.pow(Y-X) * BigNumber.TWO.pow(perm1.level) * Z : BigNumber.ZERO ; 
 
     currency.value += bonus * rho1_dot * dt;
@@ -320,7 +320,7 @@ var getPrimaryEquation = () => {
     let result = "\\begin{matrix}";
     result += "\\dot{\\rho_1}=";
     result += "2^X";
-    if(ZEffect.level == 1) result += "|Y-10Z|";
+    if(ZEffect.level == 1) result += "(Y-10(Z-1))";
 
     result += "q_1";
     if (q1Exp.level > 0) result += "^{"+(1+0.15*q1Exp.level)+"}";
