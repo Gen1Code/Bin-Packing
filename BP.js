@@ -608,9 +608,10 @@ var FFD = (FFDItems) => {
     let currentItemIndex = 0;
     let fitBin;
     let spaceLeftInBinsLength = 1;
+    let itr;
 
-    //For every Item
-    for(let i = 0; i < numItems; i++){
+    //While Items are still left
+    while(numItems != 0){
         //while no Items at current index change index
         while(FFDItems[currentItemIndex] == 0){
             currentItemIndex++;
@@ -619,11 +620,15 @@ var FFD = (FFDItems) => {
         //Flag if an Item was added or not to a Bin
         fitBin = false;
 
-        //Go through each queue
+        //Go through each Bin
         for(let j = 0; j < spaceLeftInBinsLength; j++){
             //If there is space to add an item to a bin, add it, set flag and break
             if(spaceLeftInBins[j] > RindexToValue[currentItemIndex]){
-                spaceLeftInBins[j] -= RindexToValue[currentItemIndex];
+                //Add Items to Bin until either same items run out, or not enough space anymore
+                itr = Math.floor(Math.min(spaceLeftInBins[j]/RindexToValue[currentItemIndex],FFDItems[currentItemIndex]))
+                spaceLeftInBins[j] -= itr*RindexToValue[currentItemIndex];
+                FFDItems[currentItemIndex] -= itr;
+                numItems -= itr;
                 fitBin = true;
                 break;
             }//If it fills up Bin, then remove it from array and update correct length (performance reasons)
@@ -631,6 +636,9 @@ var FFD = (FFDItems) => {
                 fitBin = true;
                 spaceLeftInBins.splice(j,1);
                 spaceLeftInBinsLength--;
+
+                FFDItems[currentItemIndex]--;
+                numItems--;
                 break;
             }
         }
@@ -640,10 +648,9 @@ var FFD = (FFDItems) => {
             spaceLeftInBins.push(100 - RindexToValue[currentItemIndex]);
             TotalFFDBins++;
             spaceLeftInBinsLength++;
+            FFDItems[currentItemIndex]--;
+            numItems--;
         }
-
-        //Remove Item Used
-        FFDItems[currentItemIndex]--;
     }
 
     return TotalFFDBins;
