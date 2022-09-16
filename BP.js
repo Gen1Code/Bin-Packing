@@ -687,7 +687,7 @@ var getZ = (ZItems) => {
         perfectFit = false;
 
         //Go through each queue
-        for(let j = 0; j < TotalZBins; j++){
+        for(let j = 0; j < spaceLeftInBinsLength; j++){
             //If there is space to add an item to a bin, check if it has the smallest space left, if so then record it, set flag 
             if(spaceLeftInBins[j] < smallestSpace && spaceLeftInBins[j] > RindexToValue[currentItemIndex]){
                 smallestSpace = spaceLeftInBins[j];
