@@ -11,13 +11,19 @@ var authors = "Gen (Gen#3006) - Idea\nXLII (XLII#0042) - Balancing";
 var version = 1;
 var releaseOrder = "7";
 
+var speedup = 100;
+
 var rho1_dot = BigNumber.ZERO;
 var rho2_dot = BigNumber.ZERO;
 
-var updateBin_flag, updateMaxLv_flag = false;
+var updateBin_flag = false, updateMaxLv_flag = false;
 
 var q1, q2, B_1, B_3, B_5, B_7, B_17, B_37, B_57, B_97, B_99;
-var X, Y, Z = BigNumber.ONE;
+
+var X = BigNumber.ONE;
+var Y = BigNumber.ONE;
+var Z = BigNumber.ONE;
+
 var B5Term, B7Term, B17Term, B57Term, B97Term, B99Term;
 
 var init = () => {
@@ -254,7 +260,7 @@ var updateAvailability = () => {
 }
 
 var tick = (elapsedTime, multiplier) => {
-    let dt = BigNumber.from(elapsedTime*multiplier); 
+    let dt = BigNumber.from(elapsedTime*multiplier*speedup); 
     let bonus = theory.publicationMultiplier; 
     let vq1 = getQ1(q1.level).pow(getQ1Exp(q1Exp.level));
     let vq2 = getQ2(q2.level);
@@ -285,8 +291,8 @@ var tick = (elapsedTime, multiplier) => {
         updateBin_flag = false;
     }
 
-    rho1_dot = vq1 * vq2 * (BigNumber.TWO.pow(X)) * (ZEffect.level == 1 ? (Y-BigNumber.TEN*Z).abs() : BigNumber.ONE); 
-    rho2_dot = q1.level > 0 ? BigNumber.FIVE.pow(Y-X+perm1.level) *  Z : BigNumber.ZERO ; 
+    rho1_dot = vq1 * vq2 * BigNumber.TWO.pow(X) * (ZEffect.level == 1 ? (Y-BigNumber.TEN*Z).abs() : BigNumber.ONE); 
+    rho2_dot = q1.level > 0 ? BigNumber.FIVE.pow(Y-X) * BigNumber.TWO.pow(perm1.level) * Z : BigNumber.ZERO ; 
 
     currency.value += bonus * rho1_dot * dt;
     currency2.value += bonus * rho2_dot * dt;
@@ -300,6 +306,7 @@ var setInternalState = (state) => {
     let values = state.split(" ");
     
     updateBin_flag = true;
+    updateMaxLv_flag = true;
 }
 
 var postPublish = () => {
@@ -342,7 +349,7 @@ var getSecondaryEquation = () => {
 var getTertiaryEquation = () => {
     let result = "\\begin{matrix}";
 
-    result += " X ="
+    result += "X ="
     result += X.toString();
 
     result += ",&Y ="
@@ -350,7 +357,6 @@ var getTertiaryEquation = () => {
     
     if(ZEffect.level == 1) result += ",&Z ="
     if(ZEffect.level == 1) result += Z.toString();
-
 
     result += "\\end{matrix}";
 
@@ -365,12 +371,6 @@ var RValueToIndexObj = {99:0, 97:1, 57:2, 37:3, 17:4, 7:5,5:6, 3:7, 1:8};
 //First fills up Bins with easy sequences, then brute forces full bins, then uses First Fit Decreasing on rest of items
 var getX = (XItems) => {
     let TotalXBins = 0;
-
-    log("Start X");
-    log("=======");
-    log("Total Bins: "+TotalXBins);
-    log("Items Left: "+XItems.toString());
-    log("");
 
     //99 + 1 = 100
     let itr = Math.min(XItems[0],XItems[8]);
@@ -502,12 +502,6 @@ var getX = (XItems) => {
     XItems[6] -= 20*itr;
     TotalXBins += itr;
 
-    log("Part 1 Done");
-    log("===========");
-    log("Total Bins: "+TotalXBins);
-    log("Items Left: "+XItems.toString());
-    log("");
-
     //Brute Force
 
     //Sets the Starting Item to start packing
@@ -575,20 +569,8 @@ var getX = (XItems) => {
         }
     }
 
-    log("Part 2 Done");
-    log("===========");
-    log("Total Bins: "+TotalXBins);
-    log("Items Left: "+XItems.toString());
-    log("");
-
     //Use First Fit decreasing on the Items that are left
     TotalXBins = TotalXBins + FFD(XItems);
-
-    log("Finished X");
-    log("==========");
-    log("Total Bins: "+TotalXBins);
-    log("Items Left: "+XItems.toString());
-    log("");
 
     return TotalXBins;
 }
@@ -716,12 +698,6 @@ var getZ = (ZItems) => {
     let perfectFit;
     let itr;
 
-    log("Start Z");
-    log("=======");
-    log("Total Bins: "+TotalZBins);
-    log("Items Left: "+ZItems.toString());
-    log("");
-
     //While Items remain
     while (numItems != 0){
         //while no Items at current index change index
@@ -772,12 +748,6 @@ var getZ = (ZItems) => {
             }
         }
     }
-
-    log("Finished Z");
-    log("==========");
-    log("Total Bins: "+TotalZBins);
-    log("Items Left: "+ZItems.toString());
-    log("");
 
     return TotalZBins;
 }
