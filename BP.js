@@ -662,6 +662,7 @@ var getZ = (ZItems) => {
     //Setup
     let TotalZBins = 1;
     let spaceLeftInBins = [1000];
+    let spaceLeftInBinsLength = 1;
     let currentItemIndex = 0;
     let fitABin;
     let smallestSpace;
