@@ -280,13 +280,13 @@ var tick = (elapsedTime, multiplier) => {
 
         X = getX(Bins);
         Y = getY(Bins2);
-        Z = getZ(Bins3);
+        Z = ZEffect.level == 1 ? getZ(Bins3) : BigNumber.ONE;
 
         updateBin_flag = false;
     }
 
     rho1_dot = vq1 * vq2 * (BigNumber.TWO.pow(X)) * (ZEffect.level == 1 ? (Y-BigNumber.TEN*Z).abs() : BigNumber.ONE); 
-    rho2_dot = q1.level > 0 ? BigNumber.FIVE.pow(Y-X+perm1.level) * (ZEffect.level == 1 ? Z : BigNumber.ONE)  : BigNumber.ZERO ; 
+    rho2_dot = q1.level > 0 ? BigNumber.FIVE.pow(Y-X+perm1.level) *  Z : BigNumber.ZERO ; 
 
     currency.value += bonus * rho1_dot * dt;
     currency2.value += bonus * rho2_dot * dt;
@@ -675,6 +675,8 @@ var getY = (YItems) => {
             TotalYBins++;
             spaceLeftInBin = 100 - indexToValue[currentItemIndex];
         }else{
+            //itr here for more performance? 
+            //works for FFD since large Items are gone due to sequences and Brute force going in a descending manner but here maybe not?
             spaceLeftInBin -= indexToValue[currentItemIndex];
         }
         YItems[currentItemIndex]--;
@@ -709,7 +711,7 @@ var getZ = (ZItems) => {
     log("Items Left: "+ZItems.toString());
     log("");
 
-    //For every Item
+    //While Items remain
     while (numItems != 0){
         //while no Items at current index change index
         while(ZItems[currentItemIndex] == 0){
@@ -721,7 +723,7 @@ var getZ = (ZItems) => {
         smallestSpace = 1001;
         perfectFit = false;
 
-        //Go through each queue
+        //Go through each Bin
         for(let j = 0; j < spaceLeftInBinsLength; j++){
             //If there is space to add an item to a bin, check if it has the smallest space left, if so then record it, set flag 
             if(spaceLeftInBins[j] < smallestSpace && spaceLeftInBins[j] > RindexToValue[currentItemIndex]){
