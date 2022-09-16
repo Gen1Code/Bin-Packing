@@ -471,6 +471,18 @@ var getX = (XItems) => {
     XItems[8] -= 6*itr;
     TotalXBins += itr;
 
+    //13*7 + 3*3 = 100
+    itr = Math.floor(Math.min(XItems[5]/13,XItems[7]/3));
+    XItems[5] -= 13*itr;
+    XItems[7] -= 3*itr;
+    TotalXBins += itr;
+
+    //14*7 + 1 + 1 = 100
+    itr = Math.floor(Math.min(XItems[5]/14,XItems[8]/2));
+    XItems[5] -= 14*itr;
+    XItems[8] -= 2*itr;
+    TotalXBins += itr;
+
     //5*20 = 100
     itr = Math.floor(XItems[6]/20);
     XItems[6] -= 20*itr;
@@ -668,6 +680,7 @@ var getZ = (ZItems) => {
     let smallestSpace;
     let smallestSpaceIndex;
     let perfectFit;
+    let itr;
 
     log("Start Z");
     log("=======");
@@ -676,7 +689,7 @@ var getZ = (ZItems) => {
     log("");
 
     //For every Item
-    for(let i = 0; i < numItems; i++){
+    while (numItems != 0){
         //while no Items at current index change index
         while(ZItems[currentItemIndex] == 0){
             currentItemIndex++;
@@ -708,15 +721,22 @@ var getZ = (ZItems) => {
             spaceLeftInBins.push(1000 - RindexToValue[currentItemIndex]);
             TotalZBins++;
             spaceLeftInBinsLength++;
+            ZItems[currentItemIndex]--;
+            numItems--;
         }else{
             if(perfectFit){
                 spaceLeftInBins.splice(smallestSpaceIndex,1);
                 spaceLeftInBinsLength--;
+                ZItems[currentItemIndex]--;
+                numItems--;
             }else{
-                spaceLeftInBins[smallestSpaceIndex] -= RindexToValue[currentItemIndex];
+                //Add Items to Bin until either same items run out, or not enough space anymore
+                itr = Math.floor(Math.min(smallestSpace/RindexToValue[currentItemIndex],ZItems[currentItemIndex]))
+                spaceLeftInBins[smallestSpaceIndex] -= itr*RindexToValue[currentItemIndex];
+                ZItems[currentItemIndex] -= itr;
+                numItems -= itr;
             }
         }
-        ZItems[currentItemIndex]--;
     }
 
     log("Finished Z");
