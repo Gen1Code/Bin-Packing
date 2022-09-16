@@ -196,8 +196,8 @@ var init = () => {
 
     {
         B57Term = theory.createMilestoneUpgrade(4, 1);
-        B57Term.description = Localization.getUpgradeAddTermDesc("B_{37}");
-        B57Term.info = Localization.getUpgradeAddTermInfo("B_{37}");
+        B57Term.description = Localization.getUpgradeAddTermDesc("B_{57}");
+        B57Term.info = Localization.getUpgradeAddTermInfo("B_{57}");
         B57Term.boughtOrRefunded = (_) => {updateAvailability(); };
         B57Term.isAvailable = false;
         B57Term.canBeRefunded = (_) => B97Term.level == 0 && B99Term.level == 0;
@@ -249,7 +249,7 @@ var tick = (elapsedTime, multiplier) => {
     
     if(updateMaxLv_flag){
         B_37.maxLevel = 50 + perm2.level*3;
-        
+
         updateMaxLv_flag = false;
     }
 
@@ -666,6 +666,7 @@ var getZ = (ZItems) => {
     let fitABin;
     let smallestSpace;
     let smallestSpaceIndex;
+    let perfectFit;
 
     log("Start Z");
     log("=======");
@@ -683,20 +684,20 @@ var getZ = (ZItems) => {
         //Flag if an Item can be possibly added or not to a Bin
         fitABin = false;
         smallestSpace = 1001;
+        perfectFit = false;
 
         //Go through each queue
         for(let j = 0; j < TotalZBins; j++){
             //If there is space to add an item to a bin, check if it has the smallest space left, if so then record it, set flag 
-            if(spaceLeftInBins[j] > RindexToValue[currentItemIndex]){
-                if(spaceLeftInBins[j] < smallestSpace){
-                    smallestSpace = spaceLeftInBins[j];
-                    smallestSpaceIndex = j;
-                    fitABin = true;
-                }
+            if(spaceLeftInBins[j] < smallestSpace && spaceLeftInBins[j] > RindexToValue[currentItemIndex]){
+                smallestSpace = spaceLeftInBins[j];
+                smallestSpaceIndex = j;
+                fitABin = true;
             }//Skip rest of queues if a perfect fit
             else if(spaceLeftInBins[j] == RindexToValue[currentItemIndex]){
                 smallestSpaceIndex = j;
                 fitABin = true;
+                perfectFit = true;
                 break;
             } 
         }
@@ -705,8 +706,14 @@ var getZ = (ZItems) => {
         if(!fitABin){
             spaceLeftInBins.push(1000 - RindexToValue[currentItemIndex]);
             TotalZBins++;
+            spaceLeftInBinsLength++;
         }else{
-            spaceLeftInBins[smallestSpaceIndex] -= RindexToValue[currentItemIndex];
+            if(perfectFit){
+                spaceLeftInBins.splice(smallestSpaceIndex,1);
+                spaceLeftInBinsLength--;
+            }else{
+                spaceLeftInBins[smallestSpaceIndex] -= RindexToValue[currentItemIndex];
+            }
         }
         ZItems[currentItemIndex]--;
     }
