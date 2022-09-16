@@ -160,7 +160,7 @@ var init = () => {
     /////////////////////
     // Checkpoint Upgrades
     theory.setMilestoneCost(new LinearCost(1,5));
-    //10,60,110,160,210,260,310,360,410,460
+    //10,60,110,160,210,260,310,360,410,460,510
 
     {
         q1Exp = theory.createMilestoneUpgrade(0, 4);
@@ -203,13 +203,13 @@ var init = () => {
         B57Term.canBeRefunded = (_) => B97Term.level == 0 && B99Term.level == 0;
     }
 
-    
     {
         B97Term = theory.createMilestoneUpgrade(5, 1);
         B97Term.description = Localization.getUpgradeAddTermDesc("B_{97}");
         B97Term.info = Localization.getUpgradeAddTermInfo("B_{97}");
         B97Term.boughtOrRefunded = (_) => {updateAvailability(); };
         B97Term.isAvailable = false;
+        B97Term.canBeRefunded = (_) => ZEffect.level == 0;
     }
 
     {
@@ -218,6 +218,19 @@ var init = () => {
         B99Term.info = Localization.getUpgradeAddTermInfo("B_{99}");
         B99Term.boughtOrRefunded = (_) => {updateAvailability(); };
         B99Term.isAvailable = false;
+        B99Term.canBeRefunded = (_) => ZEffect.level == 0;
+    }
+
+    {
+        ZEffect = theory.createMilestoneUpgrade(7, 1);
+        ZEffect.getDescription = (amount) => "$\\dot{\\rho_1}\\text{ gain}\\times \\left| Y-10Z \\right|, \\text{ }\\dot{\\rho_2}\\text{ gain}\\times Z$";
+        ZEffect.getInfo = (amount) => "$\\text{Multiplies }\\dot{\\rho_1} \\text{ by } \\left| Y-10Z \\right|, \\text{ Multiplies }\\dot{\\rho_2} \\text{ by } Z$";
+        ZEffect.boughtOrRefunded = (_) => {
+            theory.invalidatePrimaryEquation();
+            theory.invalidateSecondaryEquation();
+            theory.invalidateTertiaryEquation();
+             updateAvailability(); };
+        ZEffect.isAvailable = false;
     }
 
     updateAvailability();
@@ -228,6 +241,7 @@ var updateAvailability = () => {
     B57Term.isAvailable = B5Term.level == 1 && B7Term.level == 1; 
     B97Term.isAvailable = B17Term.level == 1 && B57Term.level == 1
     B99Term.isAvailable = B17Term.level == 1 && B57Term.level == 1; 
+    ZEffect.isAvailable = B97Term.level == 1 && B99Term.level == 1; 
 
     B_5.isAvailable = B5Term.level == 1;
     B_7.isAvailable = B7Term.level == 1;
@@ -236,13 +250,11 @@ var updateAvailability = () => {
     B_97.isAvailable = B97Term.level == 1;
     B_99.isAvailable = B99Term.level == 1;
 
-
     updateBin_flag = true;
 }
 
 var tick = (elapsedTime, multiplier) => {
-    let speedup = 100;
-    let dt = BigNumber.from(elapsedTime*multiplier*speedup); 
+    let dt = BigNumber.from(elapsedTime*multiplier); 
     let bonus = theory.publicationMultiplier; 
     let vq1 = getQ1(q1.level).pow(getQ1Exp(q1Exp.level));
     let vq2 = getQ2(q2.level);
@@ -273,8 +285,8 @@ var tick = (elapsedTime, multiplier) => {
         updateBin_flag = false;
     }
 
-    rho1_dot = BigNumber.TEN.pow(Z) * vq1 * vq2 * BigNumber.TWO.pow(X); 
-    rho2_dot = q1.level > 0 ? BigNumber.FIVE.pow(Y-X+perm1.level) : BigNumber.ZERO; 
+    rho1_dot = vq1 * vq2 * (BigNumber.TWO.pow(X)) * (ZEffect.level == 1 ? (Y-BigNumber.TEN*Z).abs() : BigNumber.ONE); 
+    rho2_dot = q1.level > 0 ? BigNumber.FIVE.pow(Y-X+perm1.level) * (ZEffect.level == 1 ? Z : BigNumber.ONE)  : BigNumber.ZERO ; 
 
     currency.value += bonus * rho1_dot * dt;
     currency2.value += bonus * rho2_dot * dt;
@@ -297,12 +309,18 @@ var postPublish = () => {
 
 var getPrimaryEquation = () => {
     theory.primaryEquationHeight = 60;
-    theory.primaryEquationScale = 1.2;
+    theory.primaryEquationScale = 1.1;
     let result = "\\begin{matrix}";
-    result += "\\dot{\\rho_1}=2^X10^Zq_1";
-    if (q1Exp.level>0) result += "^{"+(1+0.15*q1Exp.level)+"}";
-    result += "q_2,\\quad";
-    result += "\\dot{\\rho_2}=5^{Y-X}";
+    result += "\\dot{\\rho_1}=";
+    result += "2^X";
+    if(ZEffect.level == 1) result += "|Y-10Z|";
+
+    result += "q_1";
+    if (q1Exp.level > 0) result += "^{"+(1+0.15*q1Exp.level)+"}";
+    result += "q_2,\\quad\\dot{\\rho_2}=";
+    if(ZEffect.level == 1) result += "Z(";
+    result += "5^{Y-X}";
+    if(ZEffect.level == 1) result += ")";
     result += "\\end{matrix}";
     return result;
 }
@@ -311,11 +329,12 @@ var getSecondaryEquation = () => {
     theory.secondaryEquationHeight = 130;
     theory.secondaryEquationScale = 0.95;
     let result = "\\text{For each X/Y Bin: } (B_i+B_j+...)\\le 100\\\\";
-    result += "\\text{For each Z Bin: } (B_i+B_j+...)\\le 1000\\\\\\\\";
+    if(ZEffect.level == 1) result += "\\text{For each Z Bin: } (B_i+B_j+...)\\le 1000\\\\";
+    result += "\\\\";
     result += "\\text{X = Bins used with Full Bin Strategy}\\\\";
     result += "\\text{Y = Bins used with Next Fit Strategy}\\\\";
-    result += "\\text{Z = Bins used with Best Fit Strategy}\\\\\\\\";
-    result += "\\qquad\\qquad\\qquad\\qquad";
+    if(ZEffect.level == 1) result += "\\text{Z = Bins used with Best Fit Strategy}\\\\";
+    result += "\\\\\\qquad\\qquad\\qquad\\qquad";
     result += theory.latexSymbol + "=\\max\\rho^{0.1}"
     return result;
 }
@@ -323,20 +342,15 @@ var getSecondaryEquation = () => {
 var getTertiaryEquation = () => {
     let result = "\\begin{matrix}";
 
-    result += "\\dot{\\rho_1} ="
-    result += rho1_dot.toString();
-
-    result += ",&\\dot{\\rho_2} ="
-    result += rho2_dot.toString();
-
-    result += ",&X ="
+    result += " X ="
     result += X.toString();
 
     result += ",&Y ="
     result += Y.toString();
     
-    result += ",&Z ="
-    result += Z.toString();
+    if(ZEffect.level == 1) result += ",&Z ="
+    if(ZEffect.level == 1) result += Z.toString();
+
 
     result += "\\end{matrix}";
 
