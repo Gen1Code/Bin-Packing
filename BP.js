@@ -149,7 +149,7 @@ var init = () => {
     theory.createAutoBuyerUpgrade(2, currency, 1e25);
     
     {
-        perm1 = theory.createPermanentUpgrade(3, currency, new ExponentialCost(100,Math.log2(1e15)));
+        perm1 = theory.createPermanentUpgrade(3, currency, new ExponentialCost(100,Math.log2(1e20)));
         perm1.getDescription = (amount) => Localization.getUpgradeMultCustomDesc("\\rho_2 \\text{ gain}", "2^{"+perm1.level+"}");
         perm1.getInfo = (amount) => Localization.getUpgradeMultCustomInfo("\\rho_2 \\text{ gain}", "2^{"+perm1.level+"}");
     }
@@ -624,7 +624,6 @@ var FFD = (FFDItems) => {
 
     //IF about to reach max statements stop
     if (approxQueues(FFDItems)>150){
-        log(approxQueues(FFDItems));
         return -1;
     }
 
