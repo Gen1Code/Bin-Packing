@@ -618,19 +618,19 @@ var getX = (XItems) => {
     }
 
     //Use First Fit decreasing on the Items that are left
-    let FFDQueues = FFD(XItems);
+    let FFDBins = FFD(XItems);
 
-    if(FFDQueues != -1){
-        TotalXBins = TotalXBins + FFDQueues;
+    if(FFDBins != -1){
+        TotalXBins = TotalXBins + FFDBins;
     }else{
-        TotalXBins = TotalXBins + Math.floor(approxQueues(XItems));
+        TotalXBins = TotalXBins + Math.floor(approxBins(XItems));
     }
     return TotalXBins;
 
 }
 
 //Fixes reaching max statments when only buying large Items
-var approxQueues = (AItems) =>{
+var approxBins = (AItems) =>{
     return (99*AItems[0]+97*AItems[1]+57*AItems[2]+37*AItems[3]+17*AItems[4]+7*AItems[5])/100;
 }
 
@@ -644,7 +644,7 @@ var FFD = (FFDItems) => {
     }
 
     //IF about to reach max statements stop
-    if (approxQueues(FFDItems)>150){
+    if (approxBins(FFDItems)>140){
         return -1;
     }
 
@@ -780,7 +780,7 @@ var getZ = (ZItems) => {
                 smallestSpace = spaceLeftInBins[j];
                 smallestSpaceIndex = j;
                 fitABin = true;
-            }//Skip rest of queues if a perfect fit
+            }//Skip rest of Bins if a perfect fit
             else if(spaceLeftInBins[j] == RindexToValue[currentItemIndex]){
                 smallestSpaceIndex = j;
                 fitABin = true;
