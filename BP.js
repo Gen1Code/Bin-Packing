@@ -11,8 +11,6 @@ var authors = "Gen (Gen#3006) - Idea\nXLII (XLII#0042) - Balancing";
 var version = 1;
 var releaseOrder = "7";
 
-var speedup = 100;
-
 var rho1_dot = BigNumber.ZERO;
 var rho2_dot = BigNumber.ZERO;
 
@@ -66,7 +64,7 @@ var init = () => {
     {
         let getDesc = (level) => "B_3=" + level;
         let getInfo = (level) => "B_3=" + level;
-        B_3 = theory.createUpgrade(3, currency2, new ExponentialCost(5, Math.log2(10)));
+        B_3 = theory.createUpgrade(3, currency2, new ExponentialCost(5, Math.log2(5)));
         B_3.getDescription = (amount) => Utils.getMath(getDesc(B_3.level));
         B_3.getInfo = (amount) => Utils.getMathTo(getInfo(B_3.level), getInfo(B_3.level + amount));
         B_3.bought = (_) => updateBin_flag = true;
@@ -96,7 +94,7 @@ var init = () => {
     {
         let getDesc = (level) => "B_{17}=" + level;
         let getInfo = (level) => "B_{17}=" + level;
-        B_17 = theory.createUpgrade(6, currency, new ExponentialCost(1e100, Math.log2(30)));
+        B_17 = theory.createUpgrade(6, currency, new ExponentialCost(1e50, Math.log2(10)));
         B_17.getDescription = (amount) => Utils.getMath(getDesc(B_17.level));
         B_17.getInfo = (amount) => Utils.getMathTo(getInfo(B_17.level), getInfo(B_17.level + amount));
         B_17.bought = (_) => updateBin_flag = true;
@@ -106,11 +104,11 @@ var init = () => {
     {
         let getDesc = (level) => "B_{37}=" + level;
         let getInfo = (level) => "B_{37}=" + level;
-        B_37 = theory.createUpgrade(7, currency2, new ExponentialCost(1e5, Math.log2(8)));
+        B_37 = theory.createUpgrade(7, currency2, new ExponentialCost(1e2, Math.log2(3)));
         B_37.getDescription = (amount) => Utils.getMath(getDesc(B_37.level));
         B_37.getInfo = (amount) => Utils.getMathTo(getInfo(B_37.level), getInfo(B_37.level + amount));
         B_37.bought = (_) => updateBin_flag = true;
-        B_37.maxLevel = 50;
+        B_37.maxLevel = 100;
 
     }
 
@@ -118,7 +116,7 @@ var init = () => {
     {
         let getDesc = (level) => "B_{57}=" + level;
         let getInfo = (level) => "B_{57}=" + level;
-        B_57 = theory.createUpgrade(8, currency, new ExponentialCost(1e200, Math.log2(1e10)));
+        B_57 = theory.createUpgrade(8, currency, new ExponentialCost(1e150, Math.log2(1e7)));
         B_57.getDescription = (amount) => Utils.getMath(getDesc(B_57.level));
         B_57.getInfo = (amount) => Utils.getMathTo(getInfo(B_57.level), getInfo(B_57.level + amount));
         B_57.bought = (_) => updateBin_flag = true;
@@ -128,7 +126,7 @@ var init = () => {
     {
         let getDesc = (level) => "B_{97}=" + level;
         let getInfo = (level) => "B_{97}=" + level;
-        B_97 = theory.createUpgrade(9, currency2, new ExponentialCost(1e15, Math.log2(1e4)));
+        B_97 = theory.createUpgrade(9, currency2, new ExponentialCost(1e44, Math.log2(1e8)));
         B_97.getDescription = (amount) => Utils.getMath(getDesc(B_97.level));
         B_97.getInfo = (amount) => Utils.getMathTo(getInfo(B_97.level), getInfo(B_97.level + amount));
         B_97.bought = (_) => updateBin_flag = true;
@@ -138,7 +136,7 @@ var init = () => {
     {
         let getDesc = (level) => "B_{99}=" + level;
         let getInfo = (level) => "B_{99}=" + level;
-        B_99 = theory.createUpgrade(10, currency2, new ExponentialCost(1e20, Math.log2(1e6)));
+        B_99 = theory.createUpgrade(10, currency2, new ExponentialCost(1e59, Math.log2(1e9)));
         B_99.getDescription = (amount) => Utils.getMath(getDesc(B_99.level));
         B_99.getInfo = (amount) => Utils.getMathTo(getInfo(B_99.level), getInfo(B_99.level + amount));
         B_99.bought = (_) => updateBin_flag = true;
@@ -151,7 +149,7 @@ var init = () => {
     theory.createAutoBuyerUpgrade(2, currency, 1e25);
     
     {
-        perm1 = theory.createPermanentUpgrade(3, currency, new ExponentialCost(100,75));
+        perm1 = theory.createPermanentUpgrade(3, currency, new ExponentialCost(100,Math.log2(1e15)));
         perm1.getDescription = (amount) => Localization.getUpgradeMultCustomDesc("\\rho_2 \\text{ gain}", "2^{"+perm1.level+"}");
         perm1.getInfo = (amount) => Localization.getUpgradeMultCustomInfo("\\rho_2 \\text{ gain}", "2^{"+perm1.level+"}");
     }
@@ -165,13 +163,11 @@ var init = () => {
 
     /////////////////////
     // Checkpoint Upgrades
-    theory.setMilestoneCost(new LinearCost(1,5));
-    //10,60,110,160,210,260,310,360,410,460,510
-
+    theory.setMilestoneCost(new CustomCost(total => BigNumber.from(getMilCustomCost(total))));
     {
         q1Exp = theory.createMilestoneUpgrade(0, 4);
-        q1Exp.description = Localization.getUpgradeIncCustomExpDesc("q_1", "0.15");
-        q1Exp.info = Localization.getUpgradeIncCustomExpInfo("q_1", "0.15");
+        q1Exp.description = Localization.getUpgradeIncCustomExpDesc("q_1", "0.025");
+        q1Exp.info = Localization.getUpgradeIncCustomExpInfo("q_1", "0.025");
         q1Exp.boughtOrRefunded = (_) => theory.invalidatePrimaryEquation();
     }
 
@@ -260,14 +256,13 @@ var updateAvailability = () => {
 }
 
 var tick = (elapsedTime, multiplier) => {
-    let dt = BigNumber.from(elapsedTime*multiplier*speedup); 
+    let dt = BigNumber.from(elapsedTime*multiplier); 
     let bonus = theory.publicationMultiplier; 
     let vq1 = getQ1(q1.level).pow(getQ1Exp(q1Exp.level));
     let vq2 = getQ2(q2.level);
     
     if(updateMaxLv_flag){
-        B_37.maxLevel = 50 + perm2.level*3;
-
+        B_37.maxLevel = 100 + perm2.level*3;
         updateMaxLv_flag = false;
     }
 
@@ -314,20 +309,50 @@ var postPublish = () => {
     B_1.level = 1;
 }
 
+var getMilCustomCost = (lvl) =>{
+    //10,60,80,160,210,260,310,360,410,460,510 (rho)
+    switch (lvl){
+        case 0:
+            return 10*0.15;
+        case 1:
+            return 60*0.15;
+        case 2:
+            return 80*0.15;
+        case 3:
+            return 160*0.15;
+        case 4:
+            return 210*0.15;
+        case 5:
+            return 260*0.15;
+        case 6:
+            return 310*0.15;
+        case 7:
+            return 360*0.15;
+        case 8:
+            return 410*0.15;
+        case 9:
+            return 460*0.15;
+    }
+    return 510*0.15;
+}
+
 var getPrimaryEquation = () => {
     theory.primaryEquationHeight = 60;
     theory.primaryEquationScale = 1.1;
     let result = "\\begin{matrix}";
+
     result += "\\dot{\\rho_1}=";
     result += "2^X";
     if(ZEffect.level == 1) result += "(Y-10(Z-1))";
 
     result += "q_1";
-    if (q1Exp.level > 0) result += "^{"+(1+0.15*q1Exp.level)+"}";
+    if (q1Exp.level > 0) result += "^{"+(1+0.025*q1Exp.level)+"}";
+
     result += "q_2,\\quad\\dot{\\rho_2}=";
     if(ZEffect.level == 1) result += "Z(";
     result += "5^{Y-X}";
     if(ZEffect.level == 1) result += ")";
+
     result += "\\end{matrix}";
     return result;
 }
@@ -337,12 +362,14 @@ var getSecondaryEquation = () => {
     theory.secondaryEquationScale = 0.95;
     let result = "\\text{For each X/Y Bin: } (B_i+B_j+...)\\le 100\\\\";
     if(ZEffect.level == 1) result += "\\text{For each Z Bin: } (B_i+B_j+...)\\le 1000\\\\";
+
     result += "\\\\";
     result += "\\text{X = Bins used with Full Bin Strategy}\\\\";
     result += "\\text{Y = Bins used with Next Fit Strategy}\\\\";
     if(ZEffect.level == 1) result += "\\text{Z = Bins used with Best Fit Strategy}\\\\";
+    
     result += "\\\\\\qquad\\qquad\\qquad\\qquad";
-    result += theory.latexSymbol + "=\\max\\rho^{0.1}"
+    result += theory.latexSymbol + "=\\max\\rho^{0.15}"
     return result;
 }
 
@@ -570,9 +597,20 @@ var getX = (XItems) => {
     }
 
     //Use First Fit decreasing on the Items that are left
-    TotalXBins = TotalXBins + FFD(XItems);
+    let FFDQueues = FFD(XItems);
 
+    if(FFDQueues != -1){
+        TotalXBins = TotalXBins + FFDQueues;
+    }else{
+        TotalXBins = TotalXBins + Math.floor(approxQueues(XItems));
+    }
     return TotalXBins;
+
+}
+
+//Fixes reaching max statments when only buying large Items
+var approxQueues = (AItems) =>{
+    return (99*AItems[0]+97*AItems[1]+57*AItems[2]+37*AItems[3]+17*AItems[4]+7*AItems[5])/100;
 }
 
 //First Fit Decreasing Algorithm
@@ -582,6 +620,12 @@ var FFD = (FFDItems) => {
     //if there are no Items then no Bins needed
     if(numItems == 0){
         return 0;
+    }
+
+    //IF about to reach max statements stop
+    if (approxQueues(FFDItems)>150){
+        log(approxQueues(FFDItems));
+        return -1;
     }
 
     //Setup
@@ -677,7 +721,6 @@ var getY = (YItems) => {
     return TotalYBins;
 }
 
-
 //Best Fit, 1000 Bin Size Descending Order
 var getZ = (ZItems) => {
     let numItems = ZItems.reduce((partialSum, a) => partialSum + a, 0);
@@ -754,13 +797,13 @@ var getZ = (ZItems) => {
 
 var getPublicationMultiplier = (tau) => tau.isZero ? BigNumber.ONE : tau;
 var getPublicationMultiplierFormula = (symbol) => "{" + symbol + "}";
-var getTau = () => currency.value.pow(BigNumber.from(0.1));
-var getCurrencyFromTau = (tau) => [tau.max(BigNumber.ONE).pow(10), currency.symbol];
+var getTau = () => currency.value.pow(BigNumber.from(0.15));
+var getCurrencyFromTau = (tau) => [tau.max(BigNumber.ONE).pow(1/0.15), currency.symbol];
 var get2DGraphValue = () => currency.value.sign * (BigNumber.ONE + currency.value.abs()).log10().toNumber();
 
-var getQ1 = (level) => Utils.getStepwisePowerSum(level, 3, 10, 0);
+var getQ1 = (level) => Utils.getStepwisePowerSum(level, 4, 10, 0);
 var getQ2 = (level) => BigNumber.TWO.pow(level);
 
-var getQ1Exp = (level) => (1 + 0.15 * level);
+var getQ1Exp = (level) => (1 + 0.025 * level);
 
 init();
