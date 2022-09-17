@@ -116,7 +116,7 @@ var init = () => {
     {
         let getDesc = (level) => "B_{57}=" + level;
         let getInfo = (level) => "B_{57}=" + level;
-        B_57 = theory.createUpgrade(8, currency, new ExponentialCost(1e150, Math.log2(1e7)));
+        B_57 = theory.createUpgrade(8, currency, new ExponentialCost(1e150, Math.log2(1e8)));
         B_57.getDescription = (amount) => Utils.getMath(getDesc(B_57.level));
         B_57.getInfo = (amount) => Utils.getMathTo(getInfo(B_57.level), getInfo(B_57.level + amount));
         B_57.bought = (_) => updateBin_flag = true;
@@ -164,15 +164,9 @@ var init = () => {
     /////////////////////
     // Checkpoint Upgrades
     theory.setMilestoneCost(new CustomCost(total => BigNumber.from(getMilCustomCost(total))));
-    {
-        q1Exp = theory.createMilestoneUpgrade(0, 4);
-        q1Exp.description = Localization.getUpgradeIncCustomExpDesc("q_1", "0.025");
-        q1Exp.info = Localization.getUpgradeIncCustomExpInfo("q_1", "0.025");
-        q1Exp.boughtOrRefunded = (_) => theory.invalidatePrimaryEquation();
-    }
 
     {
-        B5Term = theory.createMilestoneUpgrade(1, 1);
+        B5Term = theory.createMilestoneUpgrade(0, 1);
         B5Term.description = Localization.getUpgradeAddTermDesc("B_5");
         B5Term.info = Localization.getUpgradeAddTermInfo("B_5");
         B5Term.boughtOrRefunded = (_) => {updateAvailability(); };
@@ -180,7 +174,7 @@ var init = () => {
     }
 
     {
-        B7Term = theory.createMilestoneUpgrade(2, 1);
+        B7Term = theory.createMilestoneUpgrade(1, 1);
         B7Term.description = Localization.getUpgradeAddTermDesc("B_7");
         B7Term.info = Localization.getUpgradeAddTermInfo("B_7");
         B7Term.boughtOrRefunded = (_) => {updateAvailability(); };
@@ -188,7 +182,7 @@ var init = () => {
     }
 
     {
-        B17Term = theory.createMilestoneUpgrade(3, 1);
+        B17Term = theory.createMilestoneUpgrade(2, 1);
         B17Term.description = Localization.getUpgradeAddTermDesc("B_{17}");
         B17Term.info = Localization.getUpgradeAddTermInfo("B_{17}");
         B17Term.boughtOrRefunded = (_) => {updateAvailability(); };
@@ -197,7 +191,7 @@ var init = () => {
     }
 
     {
-        B57Term = theory.createMilestoneUpgrade(4, 1);
+        B57Term = theory.createMilestoneUpgrade(3, 1);
         B57Term.description = Localization.getUpgradeAddTermDesc("B_{57}");
         B57Term.info = Localization.getUpgradeAddTermInfo("B_{57}");
         B57Term.boughtOrRefunded = (_) => {updateAvailability(); };
@@ -206,7 +200,7 @@ var init = () => {
     }
 
     {
-        B97Term = theory.createMilestoneUpgrade(5, 1);
+        B97Term = theory.createMilestoneUpgrade(4, 1);
         B97Term.description = Localization.getUpgradeAddTermDesc("B_{97}");
         B97Term.info = Localization.getUpgradeAddTermInfo("B_{97}");
         B97Term.boughtOrRefunded = (_) => {updateAvailability(); };
@@ -215,7 +209,7 @@ var init = () => {
     }
 
     {
-        B99Term = theory.createMilestoneUpgrade(6, 1);
+        B99Term = theory.createMilestoneUpgrade(5, 1);
         B99Term.description = Localization.getUpgradeAddTermDesc("B_{99}");
         B99Term.info = Localization.getUpgradeAddTermInfo("B_{99}");
         B99Term.boughtOrRefunded = (_) => {updateAvailability(); };
@@ -224,7 +218,7 @@ var init = () => {
     }
 
     {
-        ZEffect = theory.createMilestoneUpgrade(7, 1);
+        ZEffect = theory.createMilestoneUpgrade(6, 1);
         ZEffect.getDescription = (amount) => "$\\dot{\\rho_1}\\text{ gain}\\times (Y-10(Z-1)), \\text{ }\\dot{\\rho_2}\\text{ gain}\\times Z$";
         ZEffect.getInfo = (amount) => "$\\text{Multiplies }\\dot{\\rho_1} \\text{ by } (Y-10(Z-1)), \\text{ Multiplies }\\dot{\\rho_2} \\text{ by } Z$";
         ZEffect.boughtOrRefunded = (_) => {
@@ -233,6 +227,19 @@ var init = () => {
             theory.invalidateTertiaryEquation();
              updateAvailability(); };
         ZEffect.isAvailable = false;
+        ZEffect.canBeRefunded = (_) => ZExp.level == 0;
+
+    }
+
+    {
+        ZExp = theory.createMilestoneUpgrade(7, 4);
+        ZExp.description = Localization.getUpgradeIncCustomExpDesc("Z", "0.05");
+        ZExp.getInfo = (amount) => "$\\text{Increases }Z\\text{ exponent by 0.05 for }\\dot{\\rho_2}$";
+        ZExp.boughtOrRefunded = (_) => {
+            theory.invalidatePrimaryEquation();
+            updateAvailability(); 
+        };
+        ZExp.isAvailable = false;
     }
 
     updateAvailability();
@@ -244,6 +251,7 @@ var updateAvailability = () => {
     B97Term.isAvailable = B17Term.level == 1 && B57Term.level == 1
     B99Term.isAvailable = B17Term.level == 1 && B57Term.level == 1; 
     ZEffect.isAvailable = B97Term.level == 1 && B99Term.level == 1; 
+    ZExp.isAvailable = ZEffect.level == 1;
 
     B_5.isAvailable = B5Term.level == 1;
     B_7.isAvailable = B7Term.level == 1;
@@ -258,7 +266,7 @@ var updateAvailability = () => {
 var tick = (elapsedTime, multiplier) => {
     let dt = BigNumber.from(elapsedTime*multiplier); 
     let bonus = theory.publicationMultiplier; 
-    let vq1 = getQ1(q1.level).pow(getQ1Exp(q1Exp.level));
+    let vq1 = getQ1(q1.level);
     let vq2 = getQ2(q2.level);
     
     if(updateMaxLv_flag){
@@ -287,7 +295,7 @@ var tick = (elapsedTime, multiplier) => {
     }
 
     rho1_dot = vq1 * vq2 * BigNumber.TWO.pow(X) * (ZEffect.level == 1 ? (Y-BigNumber.TEN*(Z-BigNumber.ONE)) : BigNumber.ONE); 
-    rho2_dot = q1.level > 0 ? BigNumber.FIVE.pow(Y-X) * BigNumber.TWO.pow(perm1.level) * Z : BigNumber.ZERO ; 
+    rho2_dot = q1.level > 0 ? BigNumber.FIVE.pow(Y-X) * BigNumber.TWO.pow(perm1.level) * BigNumber.from(Z).pow(getZExp(ZExp.level)) : BigNumber.ZERO ; 
 
     currency.value += bonus * rho1_dot * dt;
     currency2.value += bonus * rho2_dot * dt;
@@ -310,12 +318,12 @@ var postPublish = () => {
 }
 
 var getMilCustomCost = (lvl) =>{
-    //10,60,80,160,210,260,310,360,410,460,510 (rho)
+    //10,50,80,160,210,260,300,360,410,460,510 (rho)
     switch (lvl){
         case 0:
             return 10*0.15;
         case 1:
-            return 60*0.15;
+            return 50*0.15;
         case 2:
             return 80*0.15;
         case 3:
@@ -325,7 +333,7 @@ var getMilCustomCost = (lvl) =>{
         case 5:
             return 260*0.15;
         case 6:
-            return 310*0.15;
+            return 300*0.15;
         case 7:
             return 360*0.15;
         case 8:
@@ -337,23 +345,26 @@ var getMilCustomCost = (lvl) =>{
 }
 
 var getPrimaryEquation = () => {
-    theory.primaryEquationHeight = 60;
-    theory.primaryEquationScale = 1.1;
+    theory.primaryEquationHeight = 65;
+    theory.primaryEquationScale = 1;
     let result = "\\begin{matrix}";
 
     result += "\\dot{\\rho_1}=";
     result += "2^X";
     if(ZEffect.level == 1) result += "(Y-10(Z-1))";
 
-    result += "q_1";
-    if (q1Exp.level > 0) result += "^{"+(1+0.025*q1Exp.level)+"}";
+    result += "q_1q_2\\\\\\\\\\dot{\\rho_2}=";
 
-    result += "q_2,\\quad\\dot{\\rho_2}=";
-    if(ZEffect.level == 1) result += "Z(";
+    if (ZEffect.level == 1) result += "Z";
+    if (ZExp.level > 0) result += "^{"+(1+0.05*ZExp.level)+"}";
+
+    if (ZEffect.level == 1) result += "(";
+
     result += "5^{Y-X}";
+
     if(ZEffect.level == 1) result += ")";
 
-    result += "\\end{matrix}";
+    result += "\\end{matrix}\\\\";
     return result;
 }
 
@@ -510,6 +521,12 @@ var getX = (XItems) => {
     XItems[2] -= itr;
     XItems[3] -= itr;
     XItems[8] -= 6*itr;
+    TotalXBins += itr;
+
+    //37 + 21*3 = 100
+    itr = Math.floor(Math.min(XItems[3],XItems[5]/21));
+    XItems[3] -= itr;
+    XItems[7] -= 21*itr;
     TotalXBins += itr;
 
     //13*7 + 3*3 = 100
@@ -802,7 +819,6 @@ var get2DGraphValue = () => currency.value.sign * (BigNumber.ONE + currency.valu
 
 var getQ1 = (level) => Utils.getStepwisePowerSum(level, 4, 10, 0);
 var getQ2 = (level) => BigNumber.TWO.pow(level);
-
-var getQ1Exp = (level) => (1 + 0.025 * level);
+var getZExp = (level) => (1 + 0.05 * level);
 
 init();
