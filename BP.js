@@ -78,7 +78,7 @@ var init = () => {
     {
         let getDesc = (level) => "B_5=" + level;
         let getInfo = (level) => "B_5=" + level;
-        B_5 = theory.createUpgrade(4, currency, new ExponentialCost(20, Math.log2(2)));
+        B_5 = theory.createUpgrade(4, currency, new ExponentialCost(1e3, Math.log2(2)));
         B_5.getDescription = (amount) => Utils.getMath(getDesc(B_5.level));
         B_5.getInfo = (amount) => Utils.getMathTo(getInfo(B_5.level), getInfo(B_5.level + amount));
         B_5.bought = (_) => updateBin_flag = true;
@@ -88,7 +88,7 @@ var init = () => {
     {
         let getDesc = (level) => "B_7=" + level;
         let getInfo = (level) => "B_7=" + level;
-        B_7 = theory.createUpgrade(5, currency2, new ExponentialCost(1, Math.log2(2)));
+        B_7 = theory.createUpgrade(5, currency2, new ExponentialCost(1e-7, Math.log2(2)));
         B_7.getDescription = (amount) => Utils.getMath(getDesc(B_7.level));
         B_7.getInfo = (amount) => Utils.getMathTo(getInfo(B_7.level), getInfo(B_7.level + amount));
         B_7.bought = (_) => updateBin_flag = true;
@@ -98,7 +98,7 @@ var init = () => {
     {
         let getDesc = (level) => "B_{17}=" + level;
         let getInfo = (level) => "B_{17}=" + level;
-        B_17 = theory.createUpgrade(6, currency, new ExponentialCost(1e50, Math.log2(10)));
+        B_17 = theory.createUpgrade(6, currency, new ExponentialCost(3e57, Math.log2(10)));
         B_17.getDescription = (amount) => Utils.getMath(getDesc(B_17.level));
         B_17.getInfo = (amount) => Utils.getMathTo(getInfo(B_17.level), getInfo(B_17.level + amount));
         B_17.bought = (_) => updateBin_flag = true;
@@ -322,14 +322,15 @@ var postPublish = () => {
 }
 
 var getMilCustomCost = (lvl) =>{
-    //10,50,80,160,210,260,300,360,410,460,510 (rho)
+    //10,70,90,160,210,260,300,360,410,460,510 (rho)
+    //1.5,10.5,13.5,24,31.5,39,45,54,61.5,69,76.5 (tau)
     switch (lvl){
         case 0:
             return 10*0.15;
         case 1:
-            return 50*0.15;
+            return 70*0.15;
         case 2:
-            return 80*0.15;
+            return 90*0.15;
         case 3:
             return 160*0.15;
         case 4:
@@ -401,7 +402,6 @@ var getTertiaryEquation = () => {
     if(ZEffect.level == 1) result += Z.toString();
 
     result += "\\end{matrix}";
-
     return result;
 }
 
