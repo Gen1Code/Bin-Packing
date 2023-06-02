@@ -278,7 +278,7 @@ var tick = (elapsedTime, multiplier) => {
         updateMaxLv_flag = false;
     }
 
-    if (updateBin_flag) {
+    if (updateBin_flag && Math.random() < 0.12) {
         let Bins  = [
             B99Term.level == 1 ? B_99.level : 0,
             B97Term.level == 1 ? B_97.level : 0, 
