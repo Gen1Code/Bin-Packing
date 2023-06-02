@@ -676,6 +676,11 @@ var FFD = (FFDItems) => {
                 FFDItems[currentItemIndex] -= itr;
                 numItems -= itr;
                 fitBin = true;
+                //if itr*B_i == spacelefinBins
+                if(spaceLeftInBins[j] == 0){
+                    spaceLeftInBins.splice(j,1);
+                    spaceLeftInBinsLength--;
+                }
                 break;
             }//If it fills up Bin, then remove it from array and update correct length (performance reasons)
             else if(spaceLeftInBins[j] == RindexToValue[currentItemIndex]){
@@ -691,13 +696,22 @@ var FFD = (FFDItems) => {
 
         //If there was no space in any of the Bins, create a new bin and add the item there
         if(!fitBin){
-            spaceLeftInBins.push(100 - RindexToValue[currentItemIndex]);
-            TotalFFDBins++;
+            itr = Math.floor(Math.min(100/RindexToValue[currentItemIndex],FFDItems[currentItemIndex]))
+            spaceLeftInBins.push(100 - itr*RindexToValue[currentItemIndex]);
             spaceLeftInBinsLength++;
-            FFDItems[currentItemIndex]--;
-            numItems--;
+            TotalFFDBins++;
+            FFDItems[currentItemIndex] -= itr;
+            numItems -= itr;
+
+            if(spaceLeftInBins[spaceLeftInBinsLength-1] == 0){
+                spaceLeftInBins.pop();
+                spaceLeftInBinsLength--;
+            }
+
         }
     }
+
+    //PIMP: swap values and have an index for first non 0 space bin, no splicing
 
     return TotalFFDBins;
 }
