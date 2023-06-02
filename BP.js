@@ -644,7 +644,7 @@ var FFD = (FFDItems) => {
     }
 
     //IF about to reach max statements stop
-    if (approxBins(FFDItems)>140){
+    if (approxBins(FFDItems)>130){
         return -1;
     }
 
@@ -739,8 +739,8 @@ var getY = (YItems) => {
             numItems--;
         }else{
             //itr here for more performance
-            //Half implement it for when Items <= 17
-            if(currentItemIndex > 4){
+            //Implement it for when Items <= 37
+            if(currentItemIndex > 5){
                 spaceLeftInBin -= indexToValue[currentItemIndex];
                 YItems[currentItemIndex]--;
                 numItems--;
