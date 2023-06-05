@@ -8,7 +8,7 @@ var id = "bin_packing";
 var name = "Bin Packing";
 var description = "Pack as many Items as you can into Bins, each Bin has a set size.\n"+
                   "Each strategy tries to minimise the amount of Bins needed to store all the Items.\n"+
-                  "The Full Bin Strategy tries to combine Items so that they complelty fill a Bin, with the leftover Items it then performs First Fit Descending Strategy.\n"+
+                  "The Full Bin Strategy tries to combine Items so that they completely fill a Bin, with the leftover Items it then performs First Fit Descending Strategy.\n"+
                   "The First Fit Decreasing Strategy first sorts all Items into Descending Order, it then takes the first Item and goes through each Bin until the Item fits, if no Bins can fit the Item it adds a new Bin at the end and places the item there, this repeats until no Items are left.\n"+
                   "The Next Fit Strategy first sorts Items into Ascending Order, it then takes the first Item and tries to fit it into the current Bin, if it doesnt fit it goes to a new empty Bin and adds it there, this repeats until no Items are left.\n";
 var authors = "Gen (Gen#3006) - Idea\nXLII (XLII#0042) - Balancing";
