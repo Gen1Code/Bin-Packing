@@ -7,7 +7,7 @@ The CT is based on the traditional [Bin Packing Problem](https://en.wikipedia.or
 Bin Packing is where different sized items are fitted into bins of specific sizes, strategies are used to minimise the amount of bins filled.
 
 Authors: 
-Gen (Gen#3006) - Idea + Code
-XLII (XLII#0042) - Balancing
+- Gen (Gen#3006) - Idea + Code
+- XLII (XLII#0042) - Balancing
 
 ![image](https://github.com/Gen1Code/Bin-Packing/assets/72555054/63e59769-5427-486d-adda-33c5bcde0a93)
