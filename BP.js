@@ -528,7 +528,7 @@ var getX = (XItems) => {
     TotalXBins += itr;
 
     //37 + 21*3 = 100
-    itr = Math.floor(Math.min(XItems[3],XItems[5]/21));
+    itr = Math.floor(Math.min(XItems[3],XItems[7]/21));
     XItems[3] -= itr;
     XItems[7] -= 21*itr;
     TotalXBins += itr;
@@ -543,6 +543,13 @@ var getX = (XItems) => {
     itr = Math.floor(Math.min(XItems[5]/14,XItems[8]/2));
     XItems[5] -= 14*itr;
     XItems[8] -= 2*itr;
+    TotalXBins += itr;
+
+    //37*2 + 5*5 + 1 = 100
+    itr = Math.floor(Math.min(XItems[3]/2,XItems[6]/5,XItems[8]));
+    XItems[3] -= 2*itr;
+    XItems[6] -= 5*itr;
+    XItems[8] -= itr;
     TotalXBins += itr;
 
     //5*20 = 100
