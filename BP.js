@@ -468,7 +468,7 @@ var getX = (XItems) => {
     XItems[3] -= 2*itr;
     XItems[4] -= itr;
     XItems[5] -= itr;
-    XItems[6] -= 2*itr;
+    XItems[8] -= 2*itr;
     TotalXBins += itr;
 
     //37 + 3*17 + 7 + 5 = 100
