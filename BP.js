@@ -45,7 +45,7 @@ var init = () => {
     {
         let getDesc = (level) => "q_1=" + getQ1(level).toString(0);
         let getInfo = (level) => "q_1=" + getQ1(level).toString(0);
-        q1 = theory.createUpgrade(0, currency, new FirstFreeCost(new ExponentialCost(20, Math.log2(1.7))));
+        q1 = theory.createUpgrade(0, currency, new FirstFreeCost(new ExponentialCost(30, Math.log2(1.7))));
         q1.getDescription = (amount) => Utils.getMath(getDesc(q1.level));
         q1.getInfo = (amount) => Utils.getMathTo(getInfo(q1.level), getInfo(q1.level + amount));
     }
@@ -54,7 +54,7 @@ var init = () => {
     {
         let getDesc = (level) => "q_2=2^{" + level + "}";
         let getInfo = (level) => "q_2=" + getQ2(level).toString(0);
-        q2 = theory.createUpgrade(1, currency, new ExponentialCost(20, Math.log2(5.43)));
+        q2 = theory.createUpgrade(1, currency, new ExponentialCost(300, Math.log2(5.43)));
         q2.getDescription = (amount) => Utils.getMath(getDesc(q2.level));
         q2.getInfo = (amount) => Utils.getMathTo(getInfo(q2.level), getInfo(q2.level + amount));
     }
@@ -108,7 +108,7 @@ var init = () => {
     //I37
     {
         let getDesc = (level) => "I_{37}\\times" + level;
-        I_37 = theory.createUpgrade(7, currency2, new ExponentialCost(1e2, Math.log2(3)));
+        I_37 = theory.createUpgrade(7, currency2, new ExponentialCost(1, Math.log2(3)));
         I_37.getDescription = (amount) => Utils.getMath(getDesc(I_37.level));
         I_37.getInfo = (amount) => Utils.getMathTo(getDesc(I_37.level), getDesc(I_37.level + amount));
         I_37.bought = (_) => updateBin_flag = true;
@@ -319,12 +319,12 @@ var postPublish = () => {
 }
 
 var getMilCustomCost = (lvl) =>{
-    //10,70,90,160,210,260,300,360,410,460,510 (rho)
+    //10,65,90,160,210,260,300,360,410,460,510 (rho)
     switch (lvl){
         case 0:
             return 10*0.15;
         case 1:
-            return 70*0.15;
+            return 65*0.15;
         case 2:
             return 90*0.15;
         case 3:
