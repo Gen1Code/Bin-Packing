@@ -403,7 +403,7 @@ var RValueToIndexObj = {99:0, 97:1, 57:2, 37:3, 17:4, 7:5,5:6, 3:7, 1:8};
 
 //Full Bin Strategy
 //First fills up Bins with easy sequences, then brute forces full bins, then uses First Fit Decreasing on rest of items
-var getX = (XItems) => {
+function getX(XItems){
     let TotalXBins = 0;
 
     //99 + 1 = 100
@@ -629,12 +629,12 @@ var getX = (XItems) => {
 }
 
 //Fixes reaching max statments when only buying large Items
-var approxBins = (AItems) =>{
+function approxBins(AItems){
     return (99*AItems[0]+97*AItems[1]+57*AItems[2]+37*AItems[3]+17*AItems[4]+7*AItems[5])/100;
 }
 
 //First Fit Decreasing Algorithm
-var FFD = (FFDItems) => {
+function FFD(FFDItems){
     let numItems = FFDItems.reduce((partialSum, a) => partialSum + a, 0);
 
     //if there are no Items then no Bins needed
@@ -716,7 +716,7 @@ var FFD = (FFDItems) => {
 }
 
 //Uses Next Fit with Items sorted in Ascending Order
-var getY = (YItems) => {
+function getY(YItems){
     //Setup
     let numItems = YItems.reduce((partialSum, a) => partialSum + a, 0) 
     let TotalYBins = 1;
@@ -755,7 +755,7 @@ var getY = (YItems) => {
 }
 
 //Best Fit, 1000 Bin Size Descending Order
-var getZ = (ZItems) => {
+function getZ(ZItems){
     let numItems = ZItems.reduce((partialSum, a) => partialSum + a, 0);
 
     //if there are no Items then no Bins needed
