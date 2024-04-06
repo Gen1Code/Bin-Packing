@@ -61,62 +61,56 @@ var init = () => {
     
     // I1
     {
-        let getDesc = (level) => "I_1:" + level;
-        let getInfo = (level) => "I_1:" + level;
+        let getDesc = (level) => "I_1\\times" + level;
         I_1 = theory.createUpgrade(2, currency, new ExponentialCost(100, Math.log2(1e4)));
         I_1.getDescription = (amount) => Utils.getMath(getDesc(I_1.level));
-        I_1.getInfo = (amount) => Utils.getMathTo(getInfo(I_1.level), I_1.level + amount);
+        I_1.getInfo = (amount) => Utils.getMathTo(getDesc(I_1.level), getDesc(I_1.level + amount));
         I_1.bought = (_) => updateBin_flag = true;
         I_1.level = 1;
     }
     
     // I3
     {
-        let getDesc = (level) => "I_3:" + level;
-        let getInfo = (level) => "I_3:" + level;
+        let getDesc = (level) => "I_3\\times" + level;
         I_3 = theory.createUpgrade(3, currency2, new ExponentialCost(5, Math.log2(5)));
         I_3.getDescription = (amount) => Utils.getMath(getDesc(I_3.level));
-        I_3.getInfo = (amount) => Utils.getMathTo(getInfo(I_3.level), I_3.level + amount);
+        I_3.getInfo = (amount) => Utils.getMathTo(getDesc(I_3.level), getDesc(I_3.level + amount));
         I_3.bought = (_) => updateBin_flag = true;
     }
 
     // I5
     {
-        let getDesc = (level) => "I_5:" + level;
-        let getInfo = (level) => "I_5:" + level;
+        let getDesc = (level) => "I_5\\times" + level;
         I_5 = theory.createUpgrade(4, currency, new ExponentialCost(1e3, Math.log2(2)));
         I_5.getDescription = (amount) => Utils.getMath(getDesc(I_5.level));
-        I_5.getInfo = (amount) => Utils.getMathTo(getInfo(I_5.level), I_5.level + amount);
+        I_5.getInfo = (amount) => Utils.getMathTo(getDesc(I_5.level), getDesc(I_5.level + amount));
         I_5.bought = (_) => updateBin_flag = true;
     }
 
     // I7
     {
-        let getDesc = (level) => "I_7:" + level;
-        let getInfo = (level) => "I_7:" + level;
+        let getDesc = (level) => "I_7\\times" + level;
         I_7 = theory.createUpgrade(5, currency2, new ExponentialCost(1e-7, Math.log2(2)));
         I_7.getDescription = (amount) => Utils.getMath(getDesc(I_7.level));
-        I_7.getInfo = (amount) => Utils.getMathTo(getInfo(I_7.level), I_7.level + amount);
+        I_7.getInfo = (amount) => Utils.getMathTo(getDesc(I_7.level), getDesc(I_7.level + amount));
         I_7.bought = (_) => updateBin_flag = true;
     }
 
     // I17
     {
-        let getDesc = (level) => "I_{17}:" + level;
-        let getInfo = (level) => "I_{17}:" + level;
+        let getDesc = (level) => "I_{17}\\times" + level;
         I_17 = theory.createUpgrade(6, currency, new ExponentialCost(3e57, Math.log2(10)));
         I_17.getDescription = (amount) => Utils.getMath(getDesc(I_17.level));
-        I_17.getInfo = (amount) => Utils.getMathTo(getInfo(I_17.level), I_17.level + amount);
+        I_17.getInfo = (amount) => Utils.getMathTo(getDesc(I_17.level), getDesc(I_17.level + amount));
         I_17.bought = (_) => updateBin_flag = true;
     }
 
     //I37
     {
-        let getDesc = (level) => "I_{37}:" + level;
-        let getInfo = (level) => "I_{37}:" + level;
+        let getDesc = (level) => "I_{37}\\times" + level;
         I_37 = theory.createUpgrade(7, currency2, new ExponentialCost(1e2, Math.log2(3)));
         I_37.getDescription = (amount) => Utils.getMath(getDesc(I_37.level));
-        I_37.getInfo = (amount) => Utils.getMathTo(getInfo(I_37.level), I_37.level + amount);
+        I_37.getInfo = (amount) => Utils.getMathTo(getDesc(I_37.level), getDesc(I_37.level + amount));
         I_37.bought = (_) => updateBin_flag = true;
         I_37.maxLevel = 100;
 
@@ -124,31 +118,28 @@ var init = () => {
 
     //I57
     {
-        let getDesc = (level) => "I_{57}:" + level;
-        let getInfo = (level) => "I_{57}:" + level;
+        let getDesc = (level) => "I_{57}\\times" + level;
         I_57 = theory.createUpgrade(8, currency, new ExponentialCost(1e150, Math.log2(1e8)));
         I_57.getDescription = (amount) => Utils.getMath(getDesc(I_57.level));
-        I_57.getInfo = (amount) => Utils.getMathTo(getInfo(I_57.level), I_57.level + amount);
+        I_57.getInfo = (amount) => Utils.getMathTo(getDesc(I_57.level), getDesc(I_57.level + amount));
         I_57.bought = (_) => updateBin_flag = true;
     }
 
     //I97
     {
-        let getDesc = (level) => "I_{97}:" + level;
-        let getInfo = (level) => "I_{97}:" + level;
+        let getDesc = (level) => "I_{97}\\times" + level;
         I_97 = theory.createUpgrade(9, currency2, new ExponentialCost(1e44, Math.log2(1e8)));
         I_97.getDescription = (amount) => Utils.getMath(getDesc(I_97.level));
-        I_97.getInfo = (amount) => Utils.getMathTo(getInfo(I_97.level), I_97.level + amount);
+        I_97.getInfo = (amount) => Utils.getMathTo(getDesc(I_97.level), getDesc(I_97.level + amount));
         I_97.bought = (_) => updateBin_flag = true;
     }
 
     //I99
     {
-        let getDesc = (level) => "I_{99}:" + level;
-        let getInfo = (level) => "I_{99}:" + level;
+        let getDesc = (level) => "I_{99}\\times" + level;
         I_99 = theory.createUpgrade(10, currency2, new ExponentialCost(1e59, Math.log2(1e9)));
         I_99.getDescription = (amount) => Utils.getMath(getDesc(I_99.level));
-        I_99.getInfo = (amount) => Utils.getMathTo(getInfo(I_99.level), I_99.level + amount);
+        I_99.getInfo = (amount) => Utils.getMathTo(getDesc(I_99.level), getDesc(I_99.level + amount));
         I_99.bought = (_) => updateBin_flag = true;
     }
 
@@ -329,7 +320,6 @@ var postPublish = () => {
 
 var getMilCustomCost = (lvl) =>{
     //10,70,90,160,210,260,300,360,410,460,510 (rho)
-    //1.5,10.5,13.5,24,31.5,39,45,54,61.5,69,76.5 (tau)
     switch (lvl){
         case 0:
             return 10*0.15;
@@ -442,14 +432,14 @@ var getX = (XItems) => {
     XItems[8] -= itr;  
     TotalXBins += itr;
 
-    //57 + 37 + 3 + 3 = 100
+    //57 + 37 + 2*3 = 100
     itr = Math.floor(Math.min(XItems[2],XItems[3],XItems[7]/2));
     XItems[2] -= itr;
     XItems[3] -= itr;
     XItems[7] -= 2*itr;
     TotalXBins += itr;
 
-    //57 + 17 + 17 + 5 + 3 + 1 = 100
+    //57 + 2*17 + 5 + 3 + 1 = 100
     itr = Math.floor(Math.min(XItems[2],XItems[4]/2,XItems[6],XItems[7],XItems[8]));
     XItems[2] -= itr;
     XItems[4] -= 2*itr;
@@ -458,14 +448,14 @@ var getX = (XItems) => {
     XItems[8] -= itr;
     TotalXBins += itr;
 
-    //57 + 17 + 17 + 3*3 = 100
+    //57 + 2*17 + 3*3 = 100
     itr = Math.floor(Math.min(XItems[2],XItems[4]/2,XItems[7]/3));
     XItems[2] -= itr;
     XItems[4] -= 2*itr;
     XItems[7] -= 3*itr;
     TotalXBins += itr;
 
-    //37 + 37 + 17 + 7 + 1 + 1 = 100
+    //2*37 + 17 + 7 + 2*1 = 100
     itr = Math.floor(Math.min(XItems[3]/2,XItems[4],XItems[5],XItems[8]/2));
     XItems[3] -= 2*itr;
     XItems[4] -= itr;
@@ -481,7 +471,7 @@ var getX = (XItems) => {
     XItems[6] -= itr;
     TotalXBins += itr;
 
-    //37 + 17 + 17 + 4*7 + 1 = 100
+    //37 + 2*17 + 4*7 + 1 = 100
     itr = Math.floor(Math.min(XItems[3],XItems[4]/2,XItems[5]/4,XItems[8]));
     XItems[3] -= itr;
     XItems[4] -= 2*itr;
@@ -495,13 +485,13 @@ var getX = (XItems) => {
     XItems[5] -= 9*itr;
     TotalXBins += itr;
 
-    //17*5 + 5*3= 100
+    //17*5 + 5*3 = 100
     itr = Math.floor(Math.min(XItems[4]/5,XItems[6]/3));
     XItems[4] -= 5*itr;
     XItems[6] -= 3*itr;
     TotalXBins += itr;
 
-    //17*5 + 7 + 7 + 1 = 100
+    //17*5 + 2*7 + 1 = 100
     itr = Math.floor(Math.min(XItems[4]/5,XItems[5]/2,XItems[8]));
     XItems[4] -= 5*itr;
     XItems[5] -= 2*itr;
@@ -541,7 +531,7 @@ var getX = (XItems) => {
     XItems[7] -= 3*itr;
     TotalXBins += itr;
 
-    //14*7 + 1 + 1 = 100
+    //14*7 + 2*1 = 100
     itr = Math.floor(Math.min(XItems[5]/14,XItems[8]/2));
     XItems[5] -= 14*itr;
     XItems[8] -= 2*itr;
