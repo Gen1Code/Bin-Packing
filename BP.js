@@ -1,6 +1,6 @@
-import { CompositeCost, CustomCost, ExponentialCost, FirstFreeCost, LinearCost } from "./api/Costs";
+import { CustomCost, ExponentialCost, FirstFreeCost } from "./api/Costs";
 import { Localization } from "./api/Localization";
-import { parseBigNumber, BigNumber } from "./api/BigNumber";
+import { BigNumber } from "./api/BigNumber";
 import { theory } from "./api/Theory";
 import { Utils } from "./api/Utils";
 
@@ -11,22 +11,28 @@ var description = "Pack as many Items as you can into Bins, each Bin has a set s
                   "The Full Bin Strategy tries to combine Items so that they completely fill a Bin, with the leftover Items it then performs First Fit Descending Strategy.\n"+
                   "The First Fit Decreasing Strategy first sorts all Items into Descending Order, it then takes the first Item and goes through each Bin until the Item fits, if no Bins can fit the Item it adds a new Bin at the end and places the item there, this repeats until no Items are left.\n"+
                   "The Next Fit Strategy first sorts Items into Ascending Order, it then takes the first Item and tries to fit it into the current Bin, if it doesnt fit it goes to a new empty Bin and adds it there, this repeats until no Items are left.\n";
-var authors = "Gen (Gen#3006) - Idea\nXLII (XLII#0042) - Balancing";
+var authors = "Gen (Gen#3006) - Idea/Coding\nXLII (XLII#0042) - Balancing";
 var version = 1;
 var releaseOrder = "7";
+var tauMultiplier = 4;
+
 
 var rho1_dot = BigNumber.ZERO;
 var rho2_dot = BigNumber.ZERO;
 
 var updateBin_flag = false, updateMaxLv_flag = false;
 
-var q1, q2, B_1, B_3, B_5, B_7, B_17, B_37, B_57, B_97, B_99;
+var q1, q2, I_1, I_3, I_5, I_7, I_17, I_37, I_57, I_97, I_99;
 
 var X = BigNumber.ONE;
 var Y = BigNumber.ONE;
 var Z = BigNumber.ONE;
 
-var B5Term, B7Term, B17Term, B57Term, B97Term, B99Term;
+var I5Term, I7Term, I17Term, I57Term, I97Term, I99Term;
+
+
+let getItemDescription = (size) => "$\\text{Unlock Item } I_{"+size+"}$";
+let getItemInfo = (size) => "$\\text{Unlocks the Size "+size+" Item}$";
 
 var init = () => {
     currency = theory.createCurrency();
@@ -53,97 +59,97 @@ var init = () => {
         q2.getInfo = (amount) => Utils.getMathTo(getInfo(q2.level), getInfo(q2.level + amount));
     }
     
-    // B1
+    // I1
     {
-        let getDesc = (level) => "B_1=" + level;
-        let getInfo = (level) => "B_1=" + level;
-        B_1 = theory.createUpgrade(2, currency, new ExponentialCost(100, Math.log2(1e4)));
-        B_1.getDescription = (amount) => Utils.getMath(getDesc(B_1.level));
-        B_1.getInfo = (amount) => Utils.getMathTo(getInfo(B_1.level), getInfo(B_1.level + amount));
-        B_1.bought = (_) => updateBin_flag = true;
-        B_1.level = 1;
+        let getDesc = (level) => "I_1:" + level;
+        let getInfo = (level) => "I_1:" + level;
+        I_1 = theory.createUpgrade(2, currency, new ExponentialCost(100, Math.log2(1e4)));
+        I_1.getDescription = (amount) => Utils.getMath(getDesc(I_1.level));
+        I_1.getInfo = (amount) => Utils.getMathTo(getInfo(I_1.level), I_1.level + amount);
+        I_1.bought = (_) => updateBin_flag = true;
+        I_1.level = 1;
     }
     
-    // B3
+    // I3
     {
-        let getDesc = (level) => "B_3=" + level;
-        let getInfo = (level) => "B_3=" + level;
-        B_3 = theory.createUpgrade(3, currency2, new ExponentialCost(5, Math.log2(5)));
-        B_3.getDescription = (amount) => Utils.getMath(getDesc(B_3.level));
-        B_3.getInfo = (amount) => Utils.getMathTo(getInfo(B_3.level), getInfo(B_3.level + amount));
-        B_3.bought = (_) => updateBin_flag = true;
+        let getDesc = (level) => "I_3:" + level;
+        let getInfo = (level) => "I_3:" + level;
+        I_3 = theory.createUpgrade(3, currency2, new ExponentialCost(5, Math.log2(5)));
+        I_3.getDescription = (amount) => Utils.getMath(getDesc(I_3.level));
+        I_3.getInfo = (amount) => Utils.getMathTo(getInfo(I_3.level), I_3.level + amount);
+        I_3.bought = (_) => updateBin_flag = true;
     }
 
-    // B5
+    // I5
     {
-        let getDesc = (level) => "B_5=" + level;
-        let getInfo = (level) => "B_5=" + level;
-        B_5 = theory.createUpgrade(4, currency, new ExponentialCost(1e3, Math.log2(2)));
-        B_5.getDescription = (amount) => Utils.getMath(getDesc(B_5.level));
-        B_5.getInfo = (amount) => Utils.getMathTo(getInfo(B_5.level), getInfo(B_5.level + amount));
-        B_5.bought = (_) => updateBin_flag = true;
+        let getDesc = (level) => "I_5:" + level;
+        let getInfo = (level) => "I_5:" + level;
+        I_5 = theory.createUpgrade(4, currency, new ExponentialCost(1e3, Math.log2(2)));
+        I_5.getDescription = (amount) => Utils.getMath(getDesc(I_5.level));
+        I_5.getInfo = (amount) => Utils.getMathTo(getInfo(I_5.level), I_5.level + amount);
+        I_5.bought = (_) => updateBin_flag = true;
     }
 
-    // B7
+    // I7
     {
-        let getDesc = (level) => "B_7=" + level;
-        let getInfo = (level) => "B_7=" + level;
-        B_7 = theory.createUpgrade(5, currency2, new ExponentialCost(1e-7, Math.log2(2)));
-        B_7.getDescription = (amount) => Utils.getMath(getDesc(B_7.level));
-        B_7.getInfo = (amount) => Utils.getMathTo(getInfo(B_7.level), getInfo(B_7.level + amount));
-        B_7.bought = (_) => updateBin_flag = true;
+        let getDesc = (level) => "I_7:" + level;
+        let getInfo = (level) => "I_7:" + level;
+        I_7 = theory.createUpgrade(5, currency2, new ExponentialCost(1e-7, Math.log2(2)));
+        I_7.getDescription = (amount) => Utils.getMath(getDesc(I_7.level));
+        I_7.getInfo = (amount) => Utils.getMathTo(getInfo(I_7.level), I_7.level + amount);
+        I_7.bought = (_) => updateBin_flag = true;
     }
 
-    // B17
+    // I17
     {
-        let getDesc = (level) => "B_{17}=" + level;
-        let getInfo = (level) => "B_{17}=" + level;
-        B_17 = theory.createUpgrade(6, currency, new ExponentialCost(3e57, Math.log2(10)));
-        B_17.getDescription = (amount) => Utils.getMath(getDesc(B_17.level));
-        B_17.getInfo = (amount) => Utils.getMathTo(getInfo(B_17.level), getInfo(B_17.level + amount));
-        B_17.bought = (_) => updateBin_flag = true;
+        let getDesc = (level) => "I_{17}:" + level;
+        let getInfo = (level) => "I_{17}:" + level;
+        I_17 = theory.createUpgrade(6, currency, new ExponentialCost(3e57, Math.log2(10)));
+        I_17.getDescription = (amount) => Utils.getMath(getDesc(I_17.level));
+        I_17.getInfo = (amount) => Utils.getMathTo(getInfo(I_17.level), I_17.level + amount);
+        I_17.bought = (_) => updateBin_flag = true;
     }
 
-    //B37
+    //I37
     {
-        let getDesc = (level) => "B_{37}=" + level;
-        let getInfo = (level) => "B_{37}=" + level;
-        B_37 = theory.createUpgrade(7, currency2, new ExponentialCost(1e2, Math.log2(3)));
-        B_37.getDescription = (amount) => Utils.getMath(getDesc(B_37.level));
-        B_37.getInfo = (amount) => Utils.getMathTo(getInfo(B_37.level), getInfo(B_37.level + amount));
-        B_37.bought = (_) => updateBin_flag = true;
-        B_37.maxLevel = 100;
+        let getDesc = (level) => "I_{37}:" + level;
+        let getInfo = (level) => "I_{37}:" + level;
+        I_37 = theory.createUpgrade(7, currency2, new ExponentialCost(1e2, Math.log2(3)));
+        I_37.getDescription = (amount) => Utils.getMath(getDesc(I_37.level));
+        I_37.getInfo = (amount) => Utils.getMathTo(getInfo(I_37.level), I_37.level + amount);
+        I_37.bought = (_) => updateBin_flag = true;
+        I_37.maxLevel = 100;
 
     }
 
-    //B57
+    //I57
     {
-        let getDesc = (level) => "B_{57}=" + level;
-        let getInfo = (level) => "B_{57}=" + level;
-        B_57 = theory.createUpgrade(8, currency, new ExponentialCost(1e150, Math.log2(1e8)));
-        B_57.getDescription = (amount) => Utils.getMath(getDesc(B_57.level));
-        B_57.getInfo = (amount) => Utils.getMathTo(getInfo(B_57.level), getInfo(B_57.level + amount));
-        B_57.bought = (_) => updateBin_flag = true;
+        let getDesc = (level) => "I_{57}:" + level;
+        let getInfo = (level) => "I_{57}:" + level;
+        I_57 = theory.createUpgrade(8, currency, new ExponentialCost(1e150, Math.log2(1e8)));
+        I_57.getDescription = (amount) => Utils.getMath(getDesc(I_57.level));
+        I_57.getInfo = (amount) => Utils.getMathTo(getInfo(I_57.level), I_57.level + amount);
+        I_57.bought = (_) => updateBin_flag = true;
     }
 
-    //B97
+    //I97
     {
-        let getDesc = (level) => "B_{97}=" + level;
-        let getInfo = (level) => "B_{97}=" + level;
-        B_97 = theory.createUpgrade(9, currency2, new ExponentialCost(1e44, Math.log2(1e8)));
-        B_97.getDescription = (amount) => Utils.getMath(getDesc(B_97.level));
-        B_97.getInfo = (amount) => Utils.getMathTo(getInfo(B_97.level), getInfo(B_97.level + amount));
-        B_97.bought = (_) => updateBin_flag = true;
+        let getDesc = (level) => "I_{97}:" + level;
+        let getInfo = (level) => "I_{97}:" + level;
+        I_97 = theory.createUpgrade(9, currency2, new ExponentialCost(1e44, Math.log2(1e8)));
+        I_97.getDescription = (amount) => Utils.getMath(getDesc(I_97.level));
+        I_97.getInfo = (amount) => Utils.getMathTo(getInfo(I_97.level), I_97.level + amount);
+        I_97.bought = (_) => updateBin_flag = true;
     }
 
-    //B99
+    //I99
     {
-        let getDesc = (level) => "B_{99}=" + level;
-        let getInfo = (level) => "B_{99}=" + level;
-        B_99 = theory.createUpgrade(10, currency2, new ExponentialCost(1e59, Math.log2(1e9)));
-        B_99.getDescription = (amount) => Utils.getMath(getDesc(B_99.level));
-        B_99.getInfo = (amount) => Utils.getMathTo(getInfo(B_99.level), getInfo(B_99.level + amount));
-        B_99.bought = (_) => updateBin_flag = true;
+        let getDesc = (level) => "I_{99}:" + level;
+        let getInfo = (level) => "I_{99}:" + level;
+        I_99 = theory.createUpgrade(10, currency2, new ExponentialCost(1e59, Math.log2(1e9)));
+        I_99.getDescription = (amount) => Utils.getMath(getDesc(I_99.level));
+        I_99.getInfo = (amount) => Utils.getMathTo(getInfo(I_99.level), I_99.level + amount);
+        I_99.bought = (_) => updateBin_flag = true;
     }
 
     /////////////////////
@@ -160,71 +166,71 @@ var init = () => {
 
     {
         perm2 = theory.createPermanentUpgrade(4, currency2, new ExponentialCost(1e80,Math.log2(1e5)));
-        perm2.getDescription = (amount) => "$\\uparrow \\text{B_{37} Max Level by 3}$";
-        perm2.getInfo = (amount) => "$\\text{Increases B_{37} max level by "+(perm2.level*3)+"}$";
+        perm2.getDescription = (amount) => "$\\uparrow \\text{I_{37} Max Level by 3}$";
+        perm2.getInfo = (amount) => "$\\text{Increases I_{37} max level by "+(perm2.level*3)+"}$";
         perm2.bought = (_) => updateMaxLv_flag = true;
     }
 
     /////////////////////
     // Checkpoint Upgrades
-    theory.setMilestoneCost(new CustomCost(total => BigNumber.from(getMilCustomCost(total))));
+    theory.setMilestoneCost(new CustomCost(total => BigNumber.from(tauMultiplier*getMilCustomCost(total))));
 
     {
-        B5Term = theory.createMilestoneUpgrade(0, 1);
-        B5Term.description = Localization.getUpgradeAddTermDesc("B_5");
-        B5Term.info = Localization.getUpgradeAddTermInfo("B_5");
-        B5Term.boughtOrRefunded = (_) => {updateAvailability(); };
-        B5Term.canBeRefunded = (_) => B17Term.level == 0 && B57Term.level == 0;
+        I5Term = theory.createMilestoneUpgrade(0, 1);
+        I5Term.description = getItemDescription(5);
+        I5Term.info  = getItemInfo(5);
+        I5Term.boughtOrRefunded = (_) => {updateAvailability(); };
+        I5Term.canBeRefunded = (_) => I17Term.level == 0 && I57Term.level == 0;
     }
 
     {
-        B7Term = theory.createMilestoneUpgrade(1, 1);
-        B7Term.description = Localization.getUpgradeAddTermDesc("B_7");
-        B7Term.info = Localization.getUpgradeAddTermInfo("B_7");
-        B7Term.boughtOrRefunded = (_) => {updateAvailability(); };
-        B7Term.canBeRefunded = (_) => B17Term.level == 0 && B57Term.level == 0;
+        I7Term = theory.createMilestoneUpgrade(1, 1);
+        I7Term.description = getItemDescription(7);
+        I7Term.info  = getItemInfo(7);
+        I7Term.boughtOrRefunded = (_) => {updateAvailability(); };
+        I7Term.canBeRefunded = (_) => I17Term.level == 0 && I57Term.level == 0;
     }
 
     {
-        B17Term = theory.createMilestoneUpgrade(2, 1);
-        B17Term.description = Localization.getUpgradeAddTermDesc("B_{17}");
-        B17Term.info = Localization.getUpgradeAddTermInfo("B_{17}");
-        B17Term.boughtOrRefunded = (_) => {updateAvailability(); };
-        B17Term.isAvailable = false;
-        B17Term.canBeRefunded = (_) => B97Term.level == 0 && B99Term.level == 0;
+        I17Term = theory.createMilestoneUpgrade(2, 1);
+        I17Term.description = getItemDescription(17);
+        I17Term.info  = getItemInfo(17);
+        I17Term.boughtOrRefunded = (_) => {updateAvailability(); };
+        I17Term.isAvailable = false;
+        I17Term.canBeRefunded = (_) => I97Term.level == 0 && I99Term.level == 0;
     }
 
     {
-        B57Term = theory.createMilestoneUpgrade(3, 1);
-        B57Term.description = Localization.getUpgradeAddTermDesc("B_{57}");
-        B57Term.info = Localization.getUpgradeAddTermInfo("B_{57}");
-        B57Term.boughtOrRefunded = (_) => {updateAvailability(); };
-        B57Term.isAvailable = false;
-        B57Term.canBeRefunded = (_) => B97Term.level == 0 && B99Term.level == 0;
+        I57Term = theory.createMilestoneUpgrade(3, 1);
+        I57Term.description = getItemDescription(99);
+        I57Term.info  = getItemInfo(57);
+        I57Term.boughtOrRefunded = (_) => {updateAvailability(); };
+        I57Term.isAvailable = false;
+        I57Term.canBeRefunded = (_) => I97Term.level == 0 && I99Term.level == 0;
     }
 
     {
-        B97Term = theory.createMilestoneUpgrade(4, 1);
-        B97Term.description = Localization.getUpgradeAddTermDesc("B_{97}");
-        B97Term.info = Localization.getUpgradeAddTermInfo("B_{97}");
-        B97Term.boughtOrRefunded = (_) => {updateAvailability(); };
-        B97Term.isAvailable = false;
-        B97Term.canBeRefunded = (_) => ZEffect.level == 0;
+        I97Term = theory.createMilestoneUpgrade(4, 1);
+        I97Term.description = getItemDescription(97);
+        I97Term.info  = getItemInfo(97);
+        I97Term.boughtOrRefunded = (_) => {updateAvailability(); };
+        I97Term.isAvailable = false;
+        I97Term.canBeRefunded = (_) => ZEffect.level == 0;
     }
 
     {
-        B99Term = theory.createMilestoneUpgrade(5, 1);
-        B99Term.description = Localization.getUpgradeAddTermDesc("B_{99}");
-        B99Term.info = Localization.getUpgradeAddTermInfo("B_{99}");
-        B99Term.boughtOrRefunded = (_) => {updateAvailability(); };
-        B99Term.isAvailable = false;
-        B99Term.canBeRefunded = (_) => ZEffect.level == 0;
+        I99Term = theory.createMilestoneUpgrade(5, 1);
+        I99Term.description = getItemDescription(99);
+        I99Term.info  = getItemInfo(99);
+        I99Term.boughtOrRefunded = (_) => {updateAvailability(); };
+        I99Term.isAvailable = false;
+        I99Term.canBeRefunded = (_) => ZEffect.level == 0;
     }
 
     {
         ZEffect = theory.createMilestoneUpgrade(6, 1);
         ZEffect.getDescription = (amount) => "$\\dot{\\rho_1}\\text{ gain}\\times (Y-10(Z-1)), \\text{ }\\dot{\\rho_2}\\text{ gain}\\times Z$";
-        ZEffect.getInfo = (amount) => "$\\text{Multiplies }\\dot{\\rho_1} \\text{ by } (Y-10(Z-1)), \\text{ Multiplies }\\dot{\\rho_2} \\text{ by } Z$";
+        ZEffect.getInfo = (amount) => "$\\text{Unlock the }Z \\text{ term }$";
         ZEffect.boughtOrRefunded = (_) => {
             theory.invalidatePrimaryEquation();
             theory.invalidateSecondaryEquation();
@@ -250,19 +256,19 @@ var init = () => {
 }
 
 var updateAvailability = () => {
-    B17Term.isAvailable = B5Term.level == 1 && B7Term.level == 1; 
-    B57Term.isAvailable = B5Term.level == 1 && B7Term.level == 1; 
-    B97Term.isAvailable = B17Term.level == 1 && B57Term.level == 1
-    B99Term.isAvailable = B17Term.level == 1 && B57Term.level == 1; 
-    ZEffect.isAvailable = B97Term.level == 1 && B99Term.level == 1; 
+    I17Term.isAvailable = I5Term.level == 1 && I7Term.level == 1; 
+    I57Term.isAvailable = I5Term.level == 1 && I7Term.level == 1; 
+    I97Term.isAvailable = I17Term.level == 1 && I57Term.level == 1
+    I99Term.isAvailable = I17Term.level == 1 && I57Term.level == 1; 
+    ZEffect.isAvailable = I97Term.level == 1 && I99Term.level == 1; 
     ZExp.isAvailable = ZEffect.level == 1;
 
-    B_5.isAvailable = B5Term.level == 1;
-    B_7.isAvailable = B7Term.level == 1;
-    B_17.isAvailable = B17Term.level == 1;
-    B_57.isAvailable = B57Term.level == 1;
-    B_97.isAvailable = B97Term.level == 1;
-    B_99.isAvailable = B99Term.level == 1;
+    I_5.isAvailable = I5Term.level == 1;
+    I_7.isAvailable = I7Term.level == 1;
+    I_17.isAvailable = I17Term.level == 1;
+    I_57.isAvailable = I57Term.level == 1;
+    I_97.isAvailable = I97Term.level == 1;
+    I_99.isAvailable = I99Term.level == 1;
 
     updateBin_flag = true;
 }
@@ -274,20 +280,20 @@ var tick = (elapsedTime, multiplier) => {
     let vq2 = getQ2(q2.level);
     
     if(updateMaxLv_flag){
-        B_37.maxLevel = 100 + perm2.level*3;
+        I_37.maxLevel = 100 + perm2.level*3;
         updateMaxLv_flag = false;
     }
 
     if (updateBin_flag && Math.random() < 0.12) {
         let Bins  = [
-            B99Term.level == 1 ? B_99.level : 0,
-            B97Term.level == 1 ? B_97.level : 0, 
-            B57Term.level == 1 ? B_57.level : 0, 
-            B_37.level,
-            B17Term.level == 1 ? B_17.level : 0,
-            B7Term.level == 1 ? B_7.level : 0, 
-            B5Term.level == 1 ? B_5.level : 0, 
-            B_3.level, B_1.level]
+            I99Term.level == 1 ? I_99.level : 0,
+            I97Term.level == 1 ? I_97.level : 0, 
+            I57Term.level == 1 ? I_57.level : 0, 
+            I_37.level,
+            I17Term.level == 1 ? I_17.level : 0,
+            I7Term.level == 1 ? I_7.level : 0, 
+            I5Term.level == 1 ? I_5.level : 0, 
+            I_3.level, I_1.level]
         let Bins2 = Bins.slice().reverse();
         let Bins3 = Bins.slice();
 
@@ -318,7 +324,7 @@ var setInternalState = (state) => {
 
 var postPublish = () => {
     updateBin_flag = true;
-    B_1.level = 1;
+    I_1.level = 1;
 }
 
 var getMilCustomCost = (lvl) =>{
@@ -350,9 +356,9 @@ var getMilCustomCost = (lvl) =>{
 }
 
 var getPrimaryEquation = () => {
-    theory.primaryEquationHeight = 65;
+    theory.primaryEquationHeight = 88;
     theory.primaryEquationScale = 1;
-    let result = "\\begin{matrix}";
+    let result = "\\\\ \\begin{matrix}";
 
     result += "\\dot{\\rho_1}=";
     result += "2^X";
@@ -360,14 +366,10 @@ var getPrimaryEquation = () => {
 
     result += "q_1q_2\\\\\\\\\\dot{\\rho_2}=";
 
-    if (ZEffect.level == 1) result += "Z";
-    if (ZExp.level > 0) result += "^{"+(1+0.05*ZExp.level)+"}";
-
-    if (ZEffect.level == 1) result += "(";
-
     result += "5^{Y-X}";
 
-    if(ZEffect.level == 1) result += ")";
+    if (ZEffect.level == 1) result += "Z";
+    if (ZExp.level > 0) result += "^{"+(1+0.05*ZExp.level)+"}";
 
     result += "\\end{matrix}\\\\";
     return result;
@@ -376,16 +378,16 @@ var getPrimaryEquation = () => {
 var getSecondaryEquation = () => {
     theory.secondaryEquationHeight = 130;
     theory.secondaryEquationScale = 0.95;
-    let result = "\\text{For each X/Y Bin: } (B_i+B_j+...)\\le 100\\\\";
-    if(ZEffect.level == 1) result += "\\text{For each Z Bin: } (B_i+B_j+...)\\le 1000\\\\";
+    let result = "\\qquad\\qquad\\quad\\text{Each }X\\text{/}Y \\text{ Bin }= B_{100}\\\\";
+    if(ZEffect.level == 1) result += "\\qquad\\qquad\\quad\\text{Each Z Bin }= B_{1000}\\\\";
 
     result += "\\\\";
-    result += "\\text{X = Bins used with Full Bin Strategy}\\\\";
-    result += "\\text{Y = Bins used with Next Fit Strategy}\\\\";
-    if(ZEffect.level == 1) result += "\\text{Z = Bins used with Best Fit Strategy}\\\\";
+    result += "X = \\text{Bins used with Full Bin Strategy}\\\\";
+    result += "Y = \\text{Bins used with Next Fit Strategy}\\\\";
+    if(ZEffect.level == 1) result += "Z = \\text{Bins used with Best Fit Strategy}\\\\";
     
     result += "\\\\\\qquad\\qquad\\qquad\\qquad";
-    result += theory.latexSymbol + "=\\max\\rho^{0.15}"
+    result += theory.latexSymbol + "=\\max\\rho^{0.6}"
     return result;
 }
 
@@ -683,7 +685,7 @@ var FFD = (FFDItems) => {
                 FFDItems[currentItemIndex] -= itr;
                 numItems -= itr;
                 fitBin = true;
-                //if itr*B_i == spacelefinBins
+                //if itr*I_i == spacelefinBins
                 if(spaceLeftInBins[j] == 0){
                     spaceLeftInBins.splice(j,1);
                     spaceLeftInBinsLength--;
@@ -836,10 +838,10 @@ var getZ = (ZItems) => {
     return TotalZBins;
 }
 
-var getPublicationMultiplier = (tau) => tau.isZero ? BigNumber.ONE : tau;
-var getPublicationMultiplierFormula = (symbol) => "{" + symbol + "}";
-var getTau = () => currency.value.pow(BigNumber.from(0.15));
-var getCurrencyFromTau = (tau) => [tau.max(BigNumber.ONE).pow(1/0.15), currency.symbol];
+var getPublicationMultiplier = (tau) => tau.isZero ? BigNumber.ONE : tau.pow(1/tauMultiplier);
+var getPublicationMultiplierFormula = (symbol) => "{" + symbol + "^{0.25}}";
+var getTau = () => currency.value.pow(BigNumber.from(0.15*tauMultiplier));
+var getCurrencyFromTau = (tau) => [tau.max(BigNumber.ONE).pow(1/(0.15*tauMultiplier)), currency.symbol];
 var get2DGraphValue = () => currency.value.sign * (BigNumber.ONE + currency.value.abs()).log10().toNumber();
 
 var getQ1 = (level) => Utils.getStepwisePowerSum(level, 4, 10, 0);
