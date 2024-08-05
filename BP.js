@@ -1,4 +1,4 @@
-import { CustomCost, ExponentialCost, FirstFreeCost } from "./api/Costs";
+import { CustomCost, ExponentialCost, FirstFreeCost, FreeCost } from "./api/Costs";
 import { Localization } from "./api/Localization";
 import { BigNumber } from "./api/BigNumber";
 import { theory } from "./api/Theory";
@@ -21,6 +21,7 @@ var rho1_dot = BigNumber.ZERO;
 var rho2_dot = BigNumber.ZERO;
 
 var updateBin_flag = false, updateMaxLv_flag = false;
+var lastVariablesBought = [null, null, null, null, null, null, null, null, null, null];
 
 var q1, q2, I_1, I_3, I_5, I_7, I_17, I_37, I_57, I_97, I_99;
 
@@ -65,8 +66,15 @@ var init = () => {
         I_1 = theory.createUpgrade(2, currency, new ExponentialCost(100, Math.log2(1e4)));
         I_1.getDescription = (amount) => Utils.getMath(getDesc(I_1.level));
         I_1.getInfo = (amount) => Utils.getMathTo(getDesc(I_1.level), getDesc(I_1.level + amount));
-        I_1.bought = (_) => updateBin_flag = true;
         I_1.level = 1;
+        I_1.bought = (n) => {
+            for (let i = 0; i < Math.min(n,10); i++) {
+                lastVariablesBought.push(1);
+                lastVariablesBought.shift();
+            }
+            updateBin_flag = true;
+        }
+        I_1.on
     }
     
     // I3
@@ -75,7 +83,13 @@ var init = () => {
         I_3 = theory.createUpgrade(3, currency2, new ExponentialCost(5, Math.log2(5)));
         I_3.getDescription = (amount) => Utils.getMath(getDesc(I_3.level));
         I_3.getInfo = (amount) => Utils.getMathTo(getDesc(I_3.level), getDesc(I_3.level + amount));
-        I_3.bought = (_) => updateBin_flag = true;
+        I_3.bought = (n) => {
+            for (let i = 0; i < Math.min(n,10); i++) {
+                lastVariablesBought.push(3);
+                lastVariablesBought.shift();
+            }
+            updateBin_flag = true;
+        }
     }
 
     // I5
@@ -84,7 +98,13 @@ var init = () => {
         I_5 = theory.createUpgrade(4, currency, new ExponentialCost(1e3, Math.log2(2)));
         I_5.getDescription = (amount) => Utils.getMath(getDesc(I_5.level));
         I_5.getInfo = (amount) => Utils.getMathTo(getDesc(I_5.level), getDesc(I_5.level + amount));
-        I_5.bought = (_) => updateBin_flag = true;
+        I_5.bought = (n) => {
+            for (let i = 0; i < Math.min(n,10); i++) {
+                lastVariablesBought.push(5);
+                lastVariablesBought.shift();
+            }
+            updateBin_flag = true;
+        }
     }
 
     // I7
@@ -93,7 +113,13 @@ var init = () => {
         I_7 = theory.createUpgrade(5, currency2, new ExponentialCost(1e-7, Math.log2(2)));
         I_7.getDescription = (amount) => Utils.getMath(getDesc(I_7.level));
         I_7.getInfo = (amount) => Utils.getMathTo(getDesc(I_7.level), getDesc(I_7.level + amount));
-        I_7.bought = (_) => updateBin_flag = true;
+        I_7.bought = (n) => {
+            for (let i = 0; i < Math.min(n,10); i++) {
+                lastVariablesBought.push(7);
+                lastVariablesBought.shift();
+            }
+            updateBin_flag = true;
+        }
     }
 
     // I17
@@ -102,7 +128,13 @@ var init = () => {
         I_17 = theory.createUpgrade(6, currency, new ExponentialCost(3e57, Math.log2(10)));
         I_17.getDescription = (amount) => Utils.getMath(getDesc(I_17.level));
         I_17.getInfo = (amount) => Utils.getMathTo(getDesc(I_17.level), getDesc(I_17.level + amount));
-        I_17.bought = (_) => updateBin_flag = true;
+        I_17.bought = (n) => {
+            for (let i = 0; i < Math.min(n,10); i++) {
+                lastVariablesBought.push(17);
+                lastVariablesBought.shift();
+            }
+            updateBin_flag = true;
+        }
     }
 
     //I37
@@ -111,7 +143,13 @@ var init = () => {
         I_37 = theory.createUpgrade(7, currency2, new ExponentialCost(1, Math.log2(3)));
         I_37.getDescription = (amount) => Utils.getMath(getDesc(I_37.level));
         I_37.getInfo = (amount) => Utils.getMathTo(getDesc(I_37.level), getDesc(I_37.level + amount));
-        I_37.bought = (_) => updateBin_flag = true;
+        I_37.bought = (n) => {
+            for (let i = 0; i < Math.min(n,10); i++) {
+                lastVariablesBought.push(37);
+                lastVariablesBought.shift();
+            }
+            updateBin_flag = true;
+        }
         I_37.maxLevel = 100;
 
     }
@@ -122,27 +160,42 @@ var init = () => {
         I_57 = theory.createUpgrade(8, currency, new ExponentialCost(1e150, Math.log2(1e8)));
         I_57.getDescription = (amount) => Utils.getMath(getDesc(I_57.level));
         I_57.getInfo = (amount) => Utils.getMathTo(getDesc(I_57.level), getDesc(I_57.level + amount));
-        I_57.bought = (_) => updateBin_flag = true;
+        I_57.bought = (n) => {
+            for (let i = 0; i < Math.min(n,10); i++) {
+                lastVariablesBought.push(57);
+                lastVariablesBought.shift();
+            }
+            updateBin_flag = true;
+        }
     }
-
     //I97
     {
         let getDesc = (level) => "I_{97}\\times" + level;
         I_97 = theory.createUpgrade(9, currency2, new ExponentialCost(1e44, Math.log2(1e8)));
         I_97.getDescription = (amount) => Utils.getMath(getDesc(I_97.level));
         I_97.getInfo = (amount) => Utils.getMathTo(getDesc(I_97.level), getDesc(I_97.level + amount));
-        I_97.bought = (_) => updateBin_flag = true;
+        I_97.bought = (n) => {
+            for (let i = 0; i < Math.min(n,10); i++) {
+                lastVariablesBought.push(97);
+                lastVariablesBought.shift();
+            }
+            updateBin_flag = true;
+        }
     }
-
     //I99
     {
         let getDesc = (level) => "I_{99}\\times" + level;
         I_99 = theory.createUpgrade(10, currency2, new ExponentialCost(1e59, Math.log2(1e9)));
         I_99.getDescription = (amount) => Utils.getMath(getDesc(I_99.level));
         I_99.getInfo = (amount) => Utils.getMathTo(getDesc(I_99.level), getDesc(I_99.level + amount));
-        I_99.bought = (_) => updateBin_flag = true;
+        I_99.bought = (n) => {
+            for (let i = 0; i < Math.min(n,10); i++) {
+                lastVariablesBought.push(99);
+                lastVariablesBought.shift();
+            }
+            updateBin_flag = true;
+        }
     }
-
     /////////////////////
     // Permanent Upgrades
     theory.createPublicationUpgrade(0, currency, 1e8);
@@ -160,6 +213,30 @@ var init = () => {
         perm2.getDescription = (amount) => "$\\uparrow \\text{I_{37} Max Level by 3}$";
         perm2.getInfo = (amount) => "$\\text{Increases I_{37} max level by "+(perm2.level*3)+"}$";
         perm2.bought = (_) => updateMaxLv_flag = true;
+    }
+    {
+        perm3 = theory.createPermanentUpgrade(5, currency, new FreeCost());
+        perm3.getDescription = (amount) => "$\\text{Refund Last Item Bought}$";
+        perm3.getInfo = (amount) => "$\\text{Refunds the last Item bought}$";
+        perm3.bought = (_) => {
+            let last = lastVariablesBought.pop();
+            lastVariablesBought.unshift(null);
+            
+            if (last != null) {
+                switch (last) {
+                    case 1: I_1.refund(1); break;
+                    case 3: I_3.refund(1); break;
+                    case 5: I_5.refund(1); break;
+                    case 7: I_7.refund(1); break;
+                    case 17: I_17.refund(1); break;
+                    case 37: I_37.refund(1); break;
+                    case 57: I_57.refund(1); break;
+                    case 97: I_97.refund(1); break;
+                    case 99: I_99.refund(1); break;
+                }
+                updateBin_flag = true;
+            }
+        }
     }
 
     /////////////////////
@@ -295,7 +372,7 @@ var tick = (elapsedTime, multiplier) => {
         updateBin_flag = false;
     }
 
-    rho1_dot = vq1 * vq2 * BigNumber.TWO.pow(X) * (ZEffect.level == 1 ? (Y-BigNumber.TEN*(Z-BigNumber.ONE)) : BigNumber.ONE); 
+    rho1_dot = q1.level > 0 ? vq1 * vq2 * BigNumber.TWO.pow(X) * (ZEffect.level == 1 ? (Y-BigNumber.TEN*(Z-BigNumber.ONE)) : BigNumber.ONE) : BigNumber.ZERO; 
     rho2_dot = q1.level > 0 ? BigNumber.FIVE.pow(Y-X) * BigNumber.TWO.pow(perm1.level) * BigNumber.from(Z).pow(getZExp(ZExp.level)) : BigNumber.ZERO ; 
 
     currency.value += bonus * rho1_dot * dt;
@@ -314,8 +391,12 @@ var setInternalState = (state) => {
 }
 
 var postPublish = () => {
-    updateBin_flag = true;
     I_1.level = 1;
+    X = BigNumber.ONE;
+    Y = BigNumber.ONE;
+    Z = BigNumber.ONE;
+    lastVariablesBought = [null, null, null, null, null, null, null, null, null, null];
+    updateBin_flag = true;
 }
 
 var getMilCustomCost = (lvl) =>{
