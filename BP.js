@@ -222,7 +222,7 @@ var init = () => {
         perm3.getDescription = (amount) => "$\\text{Refund Last Item Bought}$";
         perm3.getInfo = (amount) => "$\\text{Refunds the last Item bought}$";
         perm3.bought = (_) => {
-            if(time-lastTimeRefunded < 8){
+            if(time-lastTimeRefunded < 300){
                 return;
             }
             log("bought perm3")
@@ -387,7 +387,7 @@ var tick = (elapsedTime, multiplier) => {
     currency2.value += bonus * rho2_dot * dt;
     
     time += dt;
-    perm3.isAvailable = time - lastTimeRefunded > 8;
+    perm3.isAvailable = time - lastTimeRefunded > 300;
 
     theory.invalidateTertiaryEquation();
 }
