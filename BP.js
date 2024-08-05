@@ -23,6 +23,9 @@ var rho2_dot = BigNumber.ZERO;
 var updateBin_flag = false, updateMaxLv_flag = false;
 var lastVariablesBought = [null, null, null, null, null, null, null, null, null, null];
 
+var time = 0;
+var lastTimeRefunded = 0;
+
 var q1, q2, I_1, I_3, I_5, I_7, I_17, I_37, I_57, I_97, I_99;
 
 var X = BigNumber.ONE;
@@ -219,6 +222,10 @@ var init = () => {
         perm3.getDescription = (amount) => "$\\text{Refund Last Item Bought}$";
         perm3.getInfo = (amount) => "$\\text{Refunds the last Item bought}$";
         perm3.bought = (_) => {
+            if(time-lastTimeRefunded < 8){
+                return;
+            }
+            log("bought perm3")
             let last = lastVariablesBought.pop();
             lastVariablesBought.unshift(null);
             
@@ -234,6 +241,7 @@ var init = () => {
                     case 97: I_97.refund(1); break;
                     case 99: I_99.refund(1); break;
                 }
+                lastTimeRefunded = time;
                 updateBin_flag = true;
             }
         }
@@ -377,6 +385,9 @@ var tick = (elapsedTime, multiplier) => {
 
     currency.value += bonus * rho1_dot * dt;
     currency2.value += bonus * rho2_dot * dt;
+    
+    time += dt;
+    perm3.isAvailable = time - lastTimeRefunded > 8;
 
     theory.invalidateTertiaryEquation();
 }
