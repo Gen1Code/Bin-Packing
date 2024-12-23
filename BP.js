@@ -278,7 +278,7 @@ var init = () => {
 
     {
         I57Term = theory.createMilestoneUpgrade(3, 1);
-        I57Term.description = getItemDescription(99);
+        I57Term.description = getItemDescription(57);
         I57Term.info  = getItemInfo(57);
         I57Term.boughtOrRefunded = (_) => {updateAvailability(); };
         I57Term.isAvailable = false;
